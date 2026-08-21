@@ -2,9 +2,13 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { relations } from "./relations";
+import { authRelations } from "./schema";
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) throw new Error("DATABASE_URL is not set");
+export function createDb(databaseUrl: string) {
+  const client = postgres(databaseUrl, {
+    prepare: false,
+    max: 1,
+  });
 
-const client = postgres(databaseUrl, { prepare: false });
-export const db = drizzle({ client, relations });
+  return drizzle({ client, relations: { ...relations, ...authRelations } });
+}

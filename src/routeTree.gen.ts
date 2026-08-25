@@ -10,43 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiBooksRouteImport } from './routes/api.books'
+import { Route as ApiGenresRouteImport } from './routes/api/genres'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as BookSlugRouteImport } from './routes/book/$slug'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiBooksIndexRouteImport } from './routes/api/books/index'
+import { Route as ApiBooksGenresRouteImport } from './routes/api/books/genres'
+import { Route as ApiImagesKeyRouteImport } from './routes/api/images/$key'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiBooksRoute = ApiBooksRouteImport.update({
-  id: '/api/books',
-  path: '/api/books',
+const ApiGenresRoute = ApiGenresRouteImport.update({
+  id: '/api/genres',
+  path: '/api/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookSlugRoute = BookSlugRouteImport.update({
+  id: '/book/$slug',
+  path: '/book/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBooksIndexRoute = ApiBooksIndexRouteImport.update({
+  id: '/api/books/',
+  path: '/api/books/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBooksGenresRoute = ApiBooksGenresRouteImport.update({
+  id: '/api/books/genres',
+  path: '/api/books/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiImagesKeyRoute = ApiImagesKeyRouteImport.update({
+  id: '/api/images/$key',
+  path: '/api/images/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/books': typeof ApiBooksRoute
+  '/api/genres': typeof ApiGenresRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/genres': typeof ApiBooksGenresRoute
+  '/api/images/$key': typeof ApiImagesKeyRoute
+  '/api/books/': typeof ApiBooksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/books': typeof ApiBooksRoute
+  '/api/genres': typeof ApiGenresRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/genres': typeof ApiBooksGenresRoute
+  '/api/images/$key': typeof ApiImagesKeyRoute
+  '/api/books': typeof ApiBooksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/books': typeof ApiBooksRoute
+  '/api/genres': typeof ApiGenresRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/book/$slug': typeof BookSlugRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/books/genres': typeof ApiBooksGenresRoute
+  '/api/images/$key': typeof ApiImagesKeyRoute
+  '/api/books/': typeof ApiBooksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/books'
+  fullPaths:
+    | '/'
+    | '/api/genres'
+    | '/api/upload'
+    | '/book/$slug'
+    | '/api/auth/$'
+    | '/api/books/genres'
+    | '/api/images/$key'
+    | '/api/books/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/books'
-  id: '__root__' | '/' | '/api/books'
+  to:
+    | '/'
+    | '/api/genres'
+    | '/api/upload'
+    | '/book/$slug'
+    | '/api/auth/$'
+    | '/api/books/genres'
+    | '/api/images/$key'
+    | '/api/books'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/genres'
+    | '/api/upload'
+    | '/book/$slug'
+    | '/api/auth/$'
+    | '/api/books/genres'
+    | '/api/images/$key'
+    | '/api/books/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiBooksRoute: typeof ApiBooksRoute
+  ApiGenresRoute: typeof ApiGenresRoute
+  ApiUploadRoute: typeof ApiUploadRoute
+  BookSlugRoute: typeof BookSlugRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBooksGenresRoute: typeof ApiBooksGenresRoute
+  ApiImagesKeyRoute: typeof ApiImagesKeyRoute
+  ApiBooksIndexRoute: typeof ApiBooksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +143,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/books': {
-      id: '/api/books'
+    '/api/genres': {
+      id: '/api/genres'
+      path: '/api/genres'
+      fullPath: '/api/genres'
+      preLoaderRoute: typeof ApiGenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/book/$slug': {
+      id: '/book/$slug'
+      path: '/book/$slug'
+      fullPath: '/book/$slug'
+      preLoaderRoute: typeof BookSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/books/': {
+      id: '/api/books/'
       path: '/api/books'
-      fullPath: '/api/books'
-      preLoaderRoute: typeof ApiBooksRouteImport
+      fullPath: '/api/books/'
+      preLoaderRoute: typeof ApiBooksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/books/genres': {
+      id: '/api/books/genres'
+      path: '/api/books/genres'
+      fullPath: '/api/books/genres'
+      preLoaderRoute: typeof ApiBooksGenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/images/$key': {
+      id: '/api/images/$key'
+      path: '/api/images/$key'
+      fullPath: '/api/images/$key'
+      preLoaderRoute: typeof ApiImagesKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,7 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiBooksRoute: ApiBooksRoute,
+  ApiGenresRoute: ApiGenresRoute,
+  ApiUploadRoute: ApiUploadRoute,
+  BookSlugRoute: BookSlugRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBooksGenresRoute: ApiBooksGenresRoute,
+  ApiImagesKeyRoute: ApiImagesKeyRoute,
+  ApiBooksIndexRoute: ApiBooksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

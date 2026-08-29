@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { env } from "cloudflare:workers";
 import { nanoid } from "nanoid";
-
-const MAX_SIZE = 1024 * 1024;
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]);
+import { ALLOWED_TYPES, MAX_SIZE } from "#/utils/image.utils.ts";
 
 const EXTENSIONS: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -13,7 +11,7 @@ const EXTENSIONS: Record<string, string> = {
   "image/avif": "avif",
 };
 
-export const Route = createFileRoute("/api/upload")({
+export const Route = createFileRoute("/api/books/cover/")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
@@ -36,7 +34,7 @@ export const Route = createFileRoute("/api/upload")({
 
           const ext = EXTENSIONS[file.type];
           const key = `shujia/cover/${Date.now().toString(36)}-${nanoid(8)}.${ext}`;
-          console.log(key);
+
           const object = await env.R2.put(key, file, {
             httpMetadata: { contentType: file.type },
           });
@@ -48,7 +46,8 @@ export const Route = createFileRoute("/api/upload")({
           const url = `${env.R2_PUBLIC_URL}/${key}`;
           return Response.json({ url, key }, { status: 201 });
         } catch (err) {
-          return new Response(`Internal server error: ${err}`, { status: 500 });
+          console.error(err);
+          return new Response(`Internal server error`, { status: 500 });
         }
       },
     },

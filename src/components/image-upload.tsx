@@ -1,6 +1,7 @@
-import { SpinnerIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { useRef } from "react";
-import { ALLOWED_TYPES, MAX_SIZE } from "#/utils/use-upload-image.ts";
+import { UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
+import { cn } from "cnfast";
+import { useRef, useState } from "react";
+import { ALLOWED_TYPES, MAX_SIZE } from "#/utils/image.utils.ts";
 
 export async function uploadToR2(file: File) {
   if (!ALLOWED_TYPES.has(file.type)) {
@@ -12,7 +13,7 @@ export async function uploadToR2(file: File) {
 
   const formData = new FormData();
   formData.set("file", file);
-  const response = await fetch("/api/upload", { method: "POST", body: formData });
+  const response = await fetch("/api/books/cover", { method: "POST", body: formData });
 
   if (!response.ok) {
     const { error } = (await response.json()) as { error?: string };
@@ -28,6 +29,7 @@ interface ImageUploadProps {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
   isUploading?: boolean;
+  handleFileDrop?: (file: File) => void;
 }
 
 export function ImageUpload({
@@ -35,8 +37,10 @@ export function ImageUpload({
   onImageChange,
   onRemove,
   isUploading = false,
+  handleFileDrop,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   function handleRemove() {
     onRemove();
@@ -44,67 +48,68 @@ export function ImageUpload({
   }
 
   return (
-    <div className="text-primary block text-sm">
-      Cover image
+    <>
       <input
         ref={inputRef}
+        id="image-upload"
         type="file"
         accept={[...ALLOWED_TYPES].join(",")}
         hidden
         onChange={onImageChange}
       />
-      {imagePrev ? (
-        <div className="border-border mt-2 flex items-center gap-3 border p-2">
-          <div className="relative">
-            <img src={imagePrev} alt="Upload preview" className="bg-muted max-w-32 object-cover" />
-          </div>
+      <div
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
 
-          {isUploading ? (
-            <div className="bg-background/60 absolute inset-0 flex items-center justify-center">
-              <SpinnerIcon size={18} className="animate-spin" />
-            </div>
-          ) : (
-            <div className="flex w-full flex-col gap-5 text-xs">
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                disabled={isUploading}
-                className="hover:text-accent cursor-pointer tracking-wide uppercase disabled:opacity-50"
-              >
-                Replace
-              </button>
-
+          const file = e.dataTransfer.files[0];
+          if (file) handleFileDrop?.(file);
+        }}
+        className={cn(
+          "group mt-1 aspect-2/3 max-h-32 rounded-xs border border-dashed min-[550px]:max-h-none",
+          isDragging ? "border-destructive" : "",
+        )}
+      >
+        <div className="relative flex h-full items-center justify-center">
+          {imagePrev ? (
+            <>
+              <img
+                src={imagePrev}
+                alt="Upload preview"
+                className={cn(
+                  "max-h-32 object-fill min-[550px]:max-h-none",
+                  isDragging ? "opacity-60" : "",
+                )}
+              />
               <button
                 type="button"
                 onClick={handleRemove}
                 disabled={isUploading}
-                className="text-muted-foreground hover:text-destructive cursor-pointer tracking-wide uppercase disabled:opacity-50"
+                className="text-destructive hover:text-destructive absolute top-1 right-1 disabled:opacity-50"
               >
-                Remove
+                <span className="sr-only">delete image preview</span>
+                <XIcon size={20} weight="bold" />
               </button>
+            </>
+          ) : (
+            <div className="text-muted-foreground group-hover:text-accent flex w-full flex-col items-center justify-center gap-2 text-xs transition-colors">
+              <UploadSimpleIcon size={20} />
+              <p className="text-center text-balance">Drop or click to upload cover</p>
             </div>
           )}
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={isUploading}
-          className="border-border hover:border-accent text-muted-foreground mt-2 flex w-full cursor-pointer flex-col items-center gap-2 border border-dashed px-4 py-6 text-xs transition-colors disabled:opacity-50"
-        >
-          {isUploading ? (
-            <>
-              <SpinnerIcon size={20} className="animate-spin" />
-              Uploading…
-            </>
-          ) : (
-            <>
-              <UploadSimpleIcon size={20} />
-              Click to upload — max 1MB
-            </>
-          )}
-        </button>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,8 +1,10 @@
-import { CheckIcon, GoogleLogoIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { GoogleLogoIcon, SignInIcon } from "@phosphor-icons/react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { signIn } from "#/lib/auth-client.ts";
+import { authClient } from "#/lib/auth-client.ts";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { LoginFormSchema, RegisterFormSchema } from "./schema";
 import {
   Dialog,
   DialogClose,
@@ -14,46 +16,65 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+function LastMethodBadge() {
+  return (
+    <span className="bg-secondary text-accent absolute right-1 rounded-xs p-0.5 text-xs font-normal">
+      Last used
+    </span>
+  );
+}
+
 export function LoginModal({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<"login" | "register">("login");
+  const lastMethod = authClient.getLastUsedLoginMethod();
 
-  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleLogin(event: React.ChangeEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    const { success, data, error } = LoginFormSchema.safeParse({
+      email: formData.get("email")?.toString().trim(),
+      password: formData.get("password")?.toString(),
+    });
 
-    const email = formData.get("email")?.toString().trim();
-    const password = formData.get("password")?.toString();
-    const name = formData.get("name")?.toString().trim();
-    if (!email || !password || (mode === "register" && !name)) {
-      toast.error("Please complete all fields.");
+    if (!success) {
+      toast.error(error.issues[0].message);
       return;
     }
 
-    await signIn.email(
-      {
-        email,
-        password,
+    await authClient.signIn.email(data, {
+      onError: ({ error }) => {
+        toast.error(error?.message || "Something went wrong. Please try again.");
       },
-      {
-        onError: ({ error }) => {
-          toast.error(error?.message || "Something went wrong. Please try again.");
-        },
-        onSuccess: () => {
-          toast.success("Welcome back.");
-        },
+    });
+  }
+
+  async function handleRegister(event: React.ChangeEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const { success, data, error } = RegisterFormSchema.safeParse({
+      email: formData.get("email")?.toString().trim(),
+      password: formData.get("password")?.toString(),
+      name: formData.get("name")?.toString().trim(),
+    });
+
+    if (!success) {
+      toast.error(error.issues[0].message);
+      return;
+    }
+
+    await authClient.signUp.email(data, {
+      onError: ({ error }) => {
+        toast.error(error?.message || "Something went wrong. Please try again.");
       },
-    );
+    });
   }
 
   const handleGoogleSignIn = async () => {
-    await signIn.social(
-      { provider: "google" },
+    await authClient.signIn.social(
+      { provider: "google", callbackURL: "/?signedIn=true" },
       {
         onError: ({ error }) => {
           toast.error(error?.message || "Something went wrong. Please try again.");
-        },
-        onSuccess: () => {
-          toast.success("Welcome back.");
         },
       },
     );
@@ -61,7 +82,15 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
 
   return (
     <Dialog>
-      <DialogTrigger className="border-primary text-primary hover:bg-primary hover:text-primary-foreground border px-4 py-2 text-sm">
+      <DialogTrigger
+        render={
+          <Button
+            variant="outline"
+            className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-2 border p-2 pr-3 text-sm"
+          />
+        }
+        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground border px-4 py-2 text-sm"
+      >
         {children}
       </DialogTrigger>
       <DialogOverlay className="bg-primary/35" />
@@ -92,12 +121,18 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
               </button>
             ))}
           </DialogDescription>
-          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+          <form
+            onSubmit={mode === "login" ? handleLogin : handleRegister}
+            className="mt-7 space-y-4"
+          >
             {mode === "register" && (
               <label className="text-primary block text-sm">
                 Name
                 <Input
+                  type="text"
                   name="name"
+                  autoFocus
+                  required
                   className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 outline-none"
                 />
               </label>
@@ -107,6 +142,8 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
               <Input
                 type="email"
                 name="email"
+                required
+                autoFocus
                 className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 outline-none"
               />
             </label>
@@ -115,22 +152,34 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
               <Input
                 type="password"
                 name="password"
+                required
                 className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 outline-none"
               />
             </label>
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 mt-3 flex w-full items-center justify-center gap-2 px-5 py-3 text-sm">
+
+            <Button
+              type="submit"
+              className="relative mt-3 flex w-full items-center px-5 py-3 text-sm font-bold"
+              variant="outline"
+            >
+              <SignInIcon size={20} weight="bold" />
               {mode === "login" ? "Log in" : "Create account"}
-              <CheckIcon className="h-4 w-4" />
-            </button>
+              {lastMethod === "email" && <LastMethodBadge />}
+            </Button>
           </form>
-          <button
+
+          <Button
             onClick={handleGoogleSignIn}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-3 flex w-full items-center justify-center gap-2 px-5 py-3 text-sm"
+            variant="outline"
+            className="relative text-sm font-bold"
           >
-            <GoogleLogoIcon size={20} />
+            <GoogleLogoIcon size={20} weight="bold" />
             Sign in with Google
-          </button>
-          <DialogClose className="bg-secondary text-primary hover:bg-secondary/90 mt-3 flex w-full items-center justify-center gap-2 px-5 py-3 text-sm">
+            {lastMethod === "google" && <LastMethodBadge />}
+          </Button>
+          <DialogClose
+            render={<Button variant="destructive" className="py-4 text-sm font-semibold" />}
+          >
             Cancel
           </DialogClose>
         </DialogHeader>

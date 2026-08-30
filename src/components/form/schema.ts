@@ -15,6 +15,15 @@ const BookFormSchema = z.object({
   genres: z.array(z.coerce.number()),
 });
 
+const LoginFormSchema = z.object({
+  email: z.string().check(z.email("Invalid email")),
+  password: z.string().check(z.minLength(8, "Password is too short")),
+});
+
+const RegisterFormSchema = LoginFormSchema.extend({
+  name: z.string().check(z.minLength(4, "Name is too short")),
+});
+
 type BookFormat = z.infer<typeof BookEnum>;
 
-export { BookFormSchema, BookEnum, type BookFormat };
+export { BookFormSchema, BookEnum, type BookFormat, LoginFormSchema, RegisterFormSchema };

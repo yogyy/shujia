@@ -1,15 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
-import { createInsertSchema } from "drizzle-orm/zod";
-import * as z from "zod/mini";
+import { eq } from "drizzle-orm/pg-core/expressions";
+import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod";
+import * as z from "zod";
 import { createDb } from "../db";
 import { bookGenres, bookSuggestions, books } from "../db/schema/bookshelf.schema";
 
-const InsertSuggestionSchema = createInsertSchema(bookSuggestions);
+const genresSchema = z.array(z.number());
+
 export const InsertBookGenreSchema = createInsertSchema(bookGenres);
 const InsertBookSchema = createInsertSchema(books).extend({
-  genres: z.array(z.number()),
+  genres: genresSchema,
 });
+const updateBookSchema = createUpdateSchema(books).extend({
+  genres: genresSchema.optional(),
+});
+const InsertSuggestionSchema = createInsertSchema(bookSuggestions);
 
 export const insertBookGenres = createServerFn({ method: "POST" })
   .validator(z.array(InsertBookGenreSchema))
@@ -28,6 +34,7 @@ export const addNewBook = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const db = createDb(env.DATABASE_URL);
     const { genres, ...bookData } = data;
+
     return db.transaction(async (tx) => {
       const [book] = await tx.insert(books).values(bookData).returning({ id: books.id });
 
@@ -40,6 +47,15 @@ export const addNewBook = createServerFn({ method: "POST" })
 
       return book;
     });
+  });
+
+export const updateBook = createServerFn({ method: "POST" })
+  .validator(updateBookSchema)
+  .handler(async ({ data }) => {
+    const db = createDb(env.DATABASE_URL);
+
+    await db.update(books).set(data).where(eq(books.id, data.id!));
+    return { success: true };
   });
 
 export const suggestBookEdit = createServerFn({ method: "POST" })

@@ -4,7 +4,7 @@ const BookEnum = z.enum(["physical", "ebook", "audiobook"]);
 const BookFormSchema = z.object({
   title: z.string().check(z.minLength(1, "Title is required")),
   author: z.string().check(z.minLength(1, "Author is required")),
-  format: BookEnum,
+  bookFormat: BookEnum,
   description: z.string(),
   totalPages: z.coerce
     .number()

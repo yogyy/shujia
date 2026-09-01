@@ -1,13 +1,13 @@
 import { PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useUploadImage } from "#/hooks/useUploadImage.ts";
 import { authClient } from "#/lib/auth-client.ts";
 import { slugify } from "#/lib/utils.ts";
 import { addNewBook } from "#/utils/books.functions.ts";
 import { FormatSelector } from "../book/format-selection";
-import { GenreSelector, type GenreSelectorRef } from "../book/genre-selection";
+import { GenreSelector } from "../book/genre-selection";
 import { ImageUpload, uploadToR2 } from "../image-upload";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -26,18 +26,17 @@ import {
 } from "@/components/ui/drawer";
 
 export function NewBookForm() {
+  const [open, setOpen] = useState(false);
   const { data: session } = authClient.useSession();
   const { image, imagePreview, handleImageChange, handleFileDrop, clearImage } = useUploadImage();
   const queryClient = useQueryClient();
-  const genreSelectorRef = useRef<GenreSelectorRef | null>(null);
 
   const { mutate: mutateBook, isPending: isBookPending } = useMutation({
     mutationFn: addNewBook,
     onSuccess: () => {
       clearImage();
       queryClient.invalidateQueries({ queryKey: ["books"] });
-      genreSelectorRef.current?.reset();
-      toast.success("Book added successfully!");
+      toast.success("Book added successfully!", { position: "top-left" });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -62,10 +61,10 @@ export function NewBookForm() {
 
     const formData = new FormData(event.currentTarget);
     const result = BookFormSchema.safeParse({
-      title: formData.get("title")?.toString().trim() ?? "",
-      author: formData.get("author")?.toString().trim() ?? "",
-      format: formData.get("format")?.toString() ?? "",
-      description: formData.get("description")?.toString().trim() ?? "",
+      title: formData.get("title")?.toString().trim(),
+      author: formData.get("author")?.toString().trim(),
+      bookFormat: formData.get("bookFormat")?.toString(),
+      description: formData.get("description")?.toString().trim(),
       totalPages: Number(formData.get("totalPages")),
       genres: formData.getAll("genres").map(Number),
     });
@@ -90,17 +89,22 @@ export function NewBookForm() {
           ...result.data,
           coverUrl,
           createdBy: session?.user?.id as string,
-          slug: slugify(formData.get("title")?.toString() ?? ""),
+          slug: slugify(result.data.title),
         },
       },
-      { onSuccess: () => event.target.reset() },
+      {
+        onSuccess: () => {
+          event.target.reset();
+          setOpen(false);
+        },
+      },
     );
   }
 
   if (!session) return null;
 
   return (
-    <Drawer swipeDirection="left">
+    <Drawer open={open} onOpenChange={setOpen} swipeDirection="left">
       <DrawerTrigger
         render={
           <Button
@@ -174,7 +178,7 @@ export function NewBookForm() {
 
           <label className="text-primary block text-sm">
             Genre
-            <GenreSelector ref={genreSelectorRef} />
+            <GenreSelector />
           </label>
 
           <label className="text-primary block text-sm">

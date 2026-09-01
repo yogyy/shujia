@@ -15,7 +15,7 @@ const formats = BookEnum.options.map((option) => ({
 
 export function FormatSelector() {
   return (
-    <Select items={formats} name="format" required>
+    <Select items={formats} name="bookFormat">
       <SelectTrigger className="focus-visible:border-accent focus-visible:[&>svg]:text-accent mt-2 w-full rounded-xs ring-0 focus-visible:ring-0">
         <SelectValue placeholder="Format" />
       </SelectTrigger>

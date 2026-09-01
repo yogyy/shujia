@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useImperativeHandle, useState } from "react";
 import {
   Combobox,
   ComboboxChip,
@@ -18,23 +17,8 @@ interface Genre {
   name: string;
 }
 
-export type GenreSelectorRef = {
-  reset: () => void;
-};
-
-type GenreSelectorProps = {
-  ref?: React.RefObject<GenreSelectorRef | null>;
-};
-
-export function GenreSelector({ ref }: GenreSelectorProps) {
-  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+export function GenreSelector() {
   const anchor = useComboboxAnchor();
-
-  useImperativeHandle(ref, () => ({
-    reset() {
-      setSelectedGenres([]);
-    },
-  }));
 
   const { data: genres } = useQuery<Genre[]>({
     queryKey: ["genres"],
@@ -43,14 +27,7 @@ export function GenreSelector({ ref }: GenreSelectorProps) {
   });
 
   return (
-    <Combobox
-      multiple
-      name="genres"
-      autoHighlight
-      items={genres}
-      value={selectedGenres}
-      onValueChange={setSelectedGenres}
-    >
+    <Combobox multiple name="genres" autoHighlight items={genres}>
       <ComboboxChips ref={anchor} className="focus-within:border-accent ring-0 focus-within:ring-0">
         <ComboboxValue>
           {(values) => (

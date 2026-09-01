@@ -77,7 +77,8 @@ export function ImageUpload({
           if (file) handleFileDrop?.(file);
         }}
         className={cn(
-          "group mt-1 aspect-2/3 max-h-32 rounded-xs border border-dashed min-[550px]:max-h-none",
+          // aspect 2/3
+          "group mt-1 h-full max-h-32 rounded-xs border border-dashed min-[550px]:max-h-none",
           isDragging ? "border-destructive" : "",
         )}
       >

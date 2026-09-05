@@ -1,6 +1,6 @@
 import { PencilSimpleLineIcon } from "@phosphor-icons/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { toast, type ExternalToast } from "sonner";
 import { useUploadImage } from "#/hooks/useUploadImage.ts";
 import { authClient } from "#/lib/auth-client.ts";
@@ -11,6 +11,7 @@ import { GenreSelector } from "../book/genre-selection";
 import { ImageUpload, uploadToR2 } from "../image-upload";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Drawer,
   DrawerClose,
@@ -29,6 +30,22 @@ interface SuggestEditFormProps {
   bookTitle: string;
 }
 
+function extractFormData(formData: FormData) {
+  const {
+    note,
+    genres: _genres,
+    totalPages: _totalPages,
+    ...singleFields
+  } = Object.fromEntries(formData.entries());
+
+  return {
+    note: note as string,
+    genres: formData.getAll("genres").map(Number),
+    totalPages: Number(formData.get("totalPages")),
+    singleFields,
+  };
+}
+
 const toastOptions: ExternalToast = {
   position: "top-left",
 };
@@ -37,49 +54,37 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
   const [open, setOpen] = useState(false);
   const { data: session } = authClient.useSession();
   const { image, imagePreview, handleImageChange, handleFileDrop, clearImage } = useUploadImage();
-  const queryClient = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const regularUser = session?.user.role === "user";
+  const isRegularUser = session?.user.role === "user";
 
   const suggestionMutation = useMutation({
     mutationFn: suggestBookEdit,
-    onSuccess: () =>
-      toast.success("Thanks! Your suggestion was submitted for review.", toastOptions),
+    onSuccess: () => {
+      formRef.current?.reset();
+      toast.success("Thanks! Your suggestion was submitted for review.", toastOptions);
+      setOpen(false);
+    },
     onError: () => toast.error("Something went wrong. Please try again.", toastOptions),
   });
 
   const updateBookMutation = useMutation({
     mutationFn: updateBook,
-    onSuccess: () => toast.success("Book updated successfully.", toastOptions),
-    onError: (err) => {
-      console.error(err);
-      toast.error("Something went wrong. Please try again.", toastOptions);
+    onSuccess: () => {
+      formRef.current?.reset();
+      toast.success("Book updated successfully.", toastOptions);
+      setOpen(false);
     },
+    onError: () => toast.error("Something went wrong. Please try again.", toastOptions),
   });
 
   const { mutateAsync: uploadImage, isPending: isUploading } = useMutation({
     mutationFn: uploadToR2,
-    mutationKey: ["image-upload"],
+    mutationKey: ["image-upload", "edit-book"],
     onSuccess: () => toast.success("Image uploaded."),
     onError: (error) => toast.error(error.message),
   });
-  let coverUrl: string | undefined;
 
-  const extractFormData = (formData: FormData) => {
-    const {
-      note,
-      genres: _genreField,
-      totalPages: _totalPages,
-      ...singleFields
-    } = Object.fromEntries(formData.entries());
-
-    return {
-      note: note as string,
-      genres: formData.getAll("genres").map(Number),
-      totalPages: Number(formData.get("totalPages")),
-      singleFields,
-    };
-  };
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -87,6 +92,7 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
 
     const { note, genres, totalPages, singleFields } = extractFormData(formData);
 
+    let coverUrl: string | undefined;
     if (image instanceof File) {
       try {
         coverUrl = await uploadImage(image);
@@ -105,15 +111,13 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
       return;
     }
 
-    if (regularUser) {
+    if (isRegularUser) {
       suggestionMutation.mutate({
         data: { note: note as string, changes: cleanData, suggestedBy: session?.user.id, bookId },
       });
     } else {
       updateBookMutation.mutate({ data: { ...cleanData, id: bookId } });
     }
-
-    form.reset();
   }
 
   return (
@@ -128,112 +132,119 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
       >
         <PencilSimpleLineIcon size={14} weight="fill" />
         &nbsp;
-        {regularUser ? "Suggest an edit" : "Edit"}
+        {isRegularUser ? "Suggest an edit" : "Edit"}
       </DrawerTrigger>
       <DrawerOverlay className="bg-muted/35" />
-      <DrawerContent className="bg-background h-svh w-full max-w-svw items-center p-5 shadow-2xl sm:max-w-xl sm:p-10">
-        <DrawerHeader>
-          <DrawerTitle className="text-accent text-xs tracking-[0.25em] uppercase">
-            Reader contribution
-          </DrawerTitle>
-          <DrawerDescription className="text-primary mt-3 font-serif text-[clamp(24px,6vw,2.25rem)] text-pretty">
-            Suggest an edit for &ldquo;{bookTitle}&rdquo;
-          </DrawerDescription>
-        </DrawerHeader>
-        <form onSubmit={handleSubmit} className="mt-7 space-y-4" id="suggest-edit-form">
-          <div
-            className={cn(
-              "relative flex flex-col gap-2",
-              regularUser ? "" : "min-[550px]:flex-row",
-            )}
+      <DrawerContent className="bg-background grid h-svh w-fit place-content-center">
+        <ScrollArea className="h-full max-w-xl p-5 shadow-2xl">
+          <DrawerHeader>
+            <DrawerTitle className="text-accent text-xs tracking-[0.25em] uppercase">
+              Reader contribution
+            </DrawerTitle>
+            <DrawerDescription className="text-primary mt-3 font-serif text-[clamp(24px,6vw,2.25rem)] text-pretty">
+              Suggest an edit for &ldquo;{bookTitle}&rdquo;
+            </DrawerDescription>
+          </DrawerHeader>
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit}
+            className="mt-7 space-y-4"
+            id="suggest-edit-form"
           >
-            <div className="flex h-full flex-3/4 grow-0 flex-col gap-4">
-              <label className="text-primary block text-sm">
-                Title
-                <Input
-                  name="title"
-                  className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
-                />
-              </label>
-              <label className="text-primary block text-sm">
-                Author
-                <Input
-                  type="text"
-                  name="author"
-                  className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
-                />
-              </label>
-              <label className="text-primary relative flex flex-col text-sm">
-                Book Format
-                <div>
-                  <FormatSelector />
-                </div>
+            <div
+              className={cn(
+                "relative flex flex-col gap-2",
+                isRegularUser ? "" : "min-[550px]:flex-row",
+              )}
+            >
+              <div className="flex h-full flex-3/4 grow-0 flex-col gap-4">
+                <label className="text-primary block text-sm">
+                  Title
+                  <Input
+                    name="title"
+                    className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
+                  />
+                </label>
+                <label className="text-primary block text-sm">
+                  Author
+                  <Input
+                    type="text"
+                    name="author"
+                    className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
+                  />
+                </label>
+                <label className="text-primary relative flex flex-col text-sm">
+                  Book Format
+                  <div>
+                    <FormatSelector />
+                  </div>
+                </label>
+              </div>
+              <label className="text-primary relative flex grow flex-col gap-1.5 text-sm min-[550px]:flex-1/4">
+                Cover Image
+                {isRegularUser ? (
+                  <Input
+                    name="coverUrl"
+                    placeholder="put image link or upload image"
+                    className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
+                  />
+                ) : (
+                  <ImageUpload
+                    imagePrev={imagePreview}
+                    onImageChange={handleImageChange}
+                    onRemove={clearImage}
+                    isUploading={isUploading}
+                    handleFileDrop={handleFileDrop}
+                  />
+                )}
               </label>
             </div>
-            <label className="text-primary relative flex grow flex-col gap-1.5 text-sm min-[550px]:flex-1/4">
-              Cover Image
-              {regularUser ? (
-                <Input
-                  name="coverUrl"
-                  placeholder="put image link or upload image"
-                  className="border-border focus:border-accent w-full border-b bg-transparent py-2 outline-none"
-                />
-              ) : (
-                <ImageUpload
-                  imagePrev={imagePreview}
-                  onImageChange={handleImageChange}
-                  onRemove={clearImage}
-                  // isUploading={isUploading}
-                  handleFileDrop={handleFileDrop}
-                />
-              )}
-            </label>
-          </div>
-          <label className="text-primary block text-sm">
-            Genre
-            <GenreSelector />
-          </label>
-          <label className="text-primary block text-sm">
-            Total Pages
-            <Input
-              type="number"
-              name="totalPages"
-              min={1}
-              className="border-border focus:border-accent mt-2 w-full border-b bg-transparent py-2 outline-none"
-            />
-          </label>
-          <label className="text-primary block text-sm">
-            Description
-            <Textarea
-              name="description"
-              rows={4}
-              placeholder="...what is this book about?"
-              className="border-border focus:border-accent mt-2 w-full rounded-xs bg-transparent py-2 outline-none"
-            />
-          </label>
-          {regularUser && (
             <label className="text-primary block text-sm">
-              What should change? <span className="text-accent">*</span>
-              <Textarea
-                name="note"
-                required
-                rows={2}
-                placeholder="e.g. The page count is wrong…"
-                className="border-border focus:border-accent mt-2 w-full rounded-xs bg-transparent py-2 outline-none"
+              Genre
+              <GenreSelector />
+            </label>
+            <label className="text-primary block text-sm">
+              Total Pages
+              <Input
+                type="number"
+                name="totalPages"
+                min={1}
+                className="border-border focus:border-accent mt-2 w-full border-b bg-transparent py-2 outline-none"
               />
             </label>
-          )}
-        </form>
-        <DrawerFooter className="mt-3 p-0">
-          <Button
-            form="suggest-edit-form"
-            type="submit"
-            disabled={suggestionMutation.isPending || !session?.user?.id}
-          >
-            Submit suggestion
-          </Button>
-          <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
-        </DrawerFooter>
+            <label className="text-primary block text-sm">
+              Description
+              <Textarea
+                name="description"
+                rows={6}
+                placeholder="...what is this book about?"
+                className="border-border focus-visible:border-accent mt-2 field-sizing-fixed w-full resize-none scrollbar-none rounded-xs bg-transparent py-2 outline-none"
+              />
+            </label>
+            {isRegularUser && (
+              <label className="text-primary block text-sm">
+                What should change? <span className="text-accent">*</span>
+                <Textarea
+                  name="note"
+                  required
+                  rows={2}
+                  placeholder="e.g. The page count is wrong…"
+                  className="border-border focus:border-accent mt-2 w-full rounded-xs bg-transparent py-2 outline-none"
+                />
+              </label>
+            )}
+          </form>
+          <DrawerFooter className="mt-3 p-0">
+            <Button
+              form="suggest-edit-form"
+              type="submit"
+              disabled={!session || suggestionMutation.isPending || isUploading}
+            >
+              {isRegularUser ? "Submit suggestion" : "Edit"}
+            </Button>
+            <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
+          </DrawerFooter>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );

@@ -78,7 +78,7 @@ export function ImageUpload({
         }}
         className={cn(
           // aspect 2/3
-          "group mt-1 h-full max-h-32 rounded-xs border border-dashed min-[550px]:max-h-none",
+          "group mt-1 grid h-full min-h-44 place-content-center rounded-xs border border-dashed min-[550px]:max-h-none",
           isDragging ? "border-destructive" : "",
         )}
       >
@@ -89,7 +89,7 @@ export function ImageUpload({
                 src={imagePrev}
                 alt="Upload preview"
                 className={cn(
-                  "max-h-32 object-fill min-[550px]:max-h-none",
+                  "max-h-[50vw] min-h-32 object-cover min-[550px]:max-h-none",
                   isDragging ? "opacity-60" : "",
                 )}
               />

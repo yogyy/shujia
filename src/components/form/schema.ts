@@ -12,7 +12,7 @@ const BookFormSchema = z.object({
       z.int("Total pages must be an integer"),
       z.positive("Total pages must be greater than 0"),
     ),
-  genres: z.array(z.coerce.number()),
+  genres: z.array(z.coerce.number()).min(1, "At least one genre is required"),
 });
 
 const LoginFormSchema = z.object({

@@ -101,7 +101,7 @@ export function NewBookForm() {
         <PlusIcon className="transition-transform group-hover:rotate-12" size={18} /> Add Book
       </DrawerTrigger>
       <DrawerOverlay className="bg-muted/35" />
-      <DrawerContent className="bg-background grid h-svh w-fit place-content-center">
+      <DrawerContent className="bg-background grid h-dvh w-fit place-content-center">
         <ScrollArea className="h-full w-svw max-w-xl p-5 shadow-2xl sm:min-w-xl">
           <DrawerHeader>
             <DrawerTitle className="text-accent text-xs tracking-[0.25em] uppercase">

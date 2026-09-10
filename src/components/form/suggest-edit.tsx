@@ -135,7 +135,7 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
         {isRegularUser ? "Suggest an edit" : "Edit"}
       </DrawerTrigger>
       <DrawerOverlay className="bg-muted/35" />
-      <DrawerContent className="bg-background grid h-svh w-fit place-content-center">
+      <DrawerContent className="bg-background grid h-dvh w-fit place-content-center">
         <ScrollArea className="h-full max-w-xl p-5 shadow-2xl">
           <DrawerHeader>
             <DrawerTitle className="text-accent text-xs tracking-[0.25em] uppercase">

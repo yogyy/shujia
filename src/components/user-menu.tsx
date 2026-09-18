@@ -4,6 +4,7 @@ import {
   IdentificationCardIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { authClient } from "#/lib/auth-client.ts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import {
 
 export function DropdownMenuAvatar() {
   const { data } = authClient.useSession();
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -37,10 +37,14 @@ export function DropdownMenuAvatar() {
             <IdentificationCardIcon />
             Account
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <BookmarksIcon />
-            Bookmarks
-          </DropdownMenuItem>
+          <DropdownMenuItem
+            render={
+              <Link to="/bookmarks" className="flex w-full cursor-pointer items-center gap-2">
+                <BookmarksIcon />
+                Bookmarks
+              </Link>
+            }
+          />
           <DropdownMenuItem disabled>
             <BellIcon />
             Notifications

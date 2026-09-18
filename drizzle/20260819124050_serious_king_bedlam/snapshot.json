@@ -2,37 +2,22 @@
   "version": "8",
   "dialect": "postgres",
   "id": "1d355c86-9850-4219-8c97-7b7a74a9a356",
-  "prevIds": [
-    "62337f86-7f45-4504-823c-38b91a868a12"
-  ],
+  "prevIds": ["62337f86-7f45-4504-823c-38b91a868a12"],
   "ddl": [
     {
-      "values": [
-        "physical",
-        "ebook",
-        "audiobook"
-      ],
+      "values": ["physical", "ebook", "audiobook"],
       "name": "shujia_book_format",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "want_to_read",
-        "reading",
-        "finished",
-        "dnf"
-      ],
+      "values": ["want_to_read", "reading", "finished", "dnf"],
       "name": "shujia_book_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "private",
-        "public",
-        "unlisted"
-      ],
+      "values": ["private", "public", "unlisted"],
       "name": "shujia_visibility",
       "entityType": "enums",
       "schema": "public"
@@ -1220,14 +1205,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_account_user_id_shujia_user_id_fkey",
@@ -1237,14 +1218,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_session_user_id_shujia_user_id_fkey",
@@ -1254,14 +1231,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_notes_user_id_shujia_user_id_fkey",
@@ -1271,14 +1244,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_book_id"
-      ],
+      "columns": ["user_book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_notes_user_book_id_shujia_user_books_id_fkey",
@@ -1288,14 +1257,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_tags_user_id_shujia_user_id_fkey",
@@ -1305,14 +1270,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_book_id"
-      ],
+      "columns": ["user_book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_book_tags_user_book_id_shujia_user_books_id_fkey",
@@ -1322,14 +1283,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tag_id"
-      ],
+      "columns": ["tag_id"],
       "schemaTo": "public",
       "tableTo": "shujia_tags",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_book_tags_tag_id_shujia_tags_id_fkey",
@@ -1339,14 +1296,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_books_user_id_shujia_user_id_fkey",
@@ -1356,14 +1309,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "book_id"
-      ],
+      "columns": ["book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_books_book_id_shujia_books_id_fkey",
@@ -1372,10 +1321,7 @@
       "table": "shujia_user_books"
     },
     {
-      "columns": [
-        "user_book_id",
-        "tag_id"
-      ],
+      "columns": ["user_book_id", "tag_id"],
       "nameExplicit": false,
       "name": "shujia_user_book_tags_pkey",
       "entityType": "pks",
@@ -1383,9 +1329,7 @@
       "table": "shujia_user_book_tags"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_account_pkey",
       "schema": "public",
@@ -1393,9 +1337,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_session_pkey",
       "schema": "public",
@@ -1403,9 +1345,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_user_pkey",
       "schema": "public",
@@ -1413,9 +1353,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_verification_pkey",
       "schema": "public",
@@ -1423,9 +1361,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_books_pkey",
       "schema": "public",
@@ -1433,9 +1369,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_notes_pkey",
       "schema": "public",
@@ -1443,9 +1377,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_tags_pkey",
       "schema": "public",
@@ -1453,9 +1385,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_user_books_pkey",
       "schema": "public",
@@ -1464,10 +1394,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "name"
-      ],
+      "columns": ["user_id", "name"],
       "nullsNotDistinct": false,
       "name": "tags_user_name_unique",
       "entityType": "uniques",
@@ -1476,10 +1403,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "book_id"
-      ],
+      "columns": ["user_id", "book_id"],
       "nullsNotDistinct": false,
       "name": "user_books_user_book_unique",
       "entityType": "uniques",
@@ -1488,9 +1412,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "token"
-      ],
+      "columns": ["token"],
       "nullsNotDistinct": false,
       "name": "shujia_session_token_key",
       "schema": "public",
@@ -1499,9 +1421,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "shujia_user_email_key",
       "schema": "public",
@@ -1510,9 +1430,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "slug"
-      ],
+      "columns": ["slug"],
       "nullsNotDistinct": false,
       "name": "shujia_books_slug_key",
       "schema": "public",

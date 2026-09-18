@@ -2,47 +2,28 @@
   "version": "8",
   "dialect": "postgres",
   "id": "14be7d2c-7f9b-432e-9b6d-f56466ae4d1d",
-  "prevIds": [
-    "1d7d4348-2d18-4a5b-b348-5aaa01304690"
-  ],
+  "prevIds": ["1d7d4348-2d18-4a5b-b348-5aaa01304690"],
   "ddl": [
     {
-      "values": [
-        "physical",
-        "ebook",
-        "audiobook"
-      ],
+      "values": ["physical", "ebook", "audiobook"],
       "name": "shujia_book_format",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "want_to_read",
-        "reading",
-        "finished",
-        "dnf"
-      ],
+      "values": ["want_to_read", "reading", "finished", "dnf"],
       "name": "shujia_book_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "pending",
-        "approved",
-        "rejected"
-      ],
+      "values": ["pending", "approved", "rejected"],
       "name": "shujia_suggestion_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": [
-        "private",
-        "public",
-        "unlisted"
-      ],
+      "values": ["private", "public", "unlisted"],
       "name": "shujia_visibility",
       "entityType": "enums",
       "schema": "public"
@@ -1455,14 +1436,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_account_user_id_shujia_user_id_fkey",
@@ -1472,14 +1449,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_session_user_id_shujia_user_id_fkey",
@@ -1489,14 +1462,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "book_id"
-      ],
+      "columns": ["book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_book_genres_book_id_shujia_books_id_fkey",
@@ -1506,14 +1475,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "genre_id"
-      ],
+      "columns": ["genre_id"],
       "schemaTo": "public",
       "tableTo": "shujia_genres",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_book_genres_genre_id_shujia_genres_id_fkey",
@@ -1523,14 +1488,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "book_id"
-      ],
+      "columns": ["book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_book_suggestions_book_id_shujia_books_id_fkey",
@@ -1540,14 +1501,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "suggested_by"
-      ],
+      "columns": ["suggested_by"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "shujia_book_suggestions_suggested_by_shujia_user_id_fkey",
@@ -1557,14 +1514,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "created_by"
-      ],
+      "columns": ["created_by"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "shujia_books_created_by_shujia_user_id_fkey",
@@ -1574,14 +1527,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_notes_user_id_shujia_user_id_fkey",
@@ -1591,14 +1540,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_book_id"
-      ],
+      "columns": ["user_book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_notes_user_book_id_shujia_user_books_id_fkey",
@@ -1608,14 +1553,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_tags_user_id_shujia_user_id_fkey",
@@ -1625,14 +1566,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_book_id"
-      ],
+      "columns": ["user_book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_book_tags_user_book_id_shujia_user_books_id_fkey",
@@ -1642,14 +1579,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "tag_id"
-      ],
+      "columns": ["tag_id"],
       "schemaTo": "public",
       "tableTo": "shujia_tags",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_book_tags_tag_id_shujia_tags_id_fkey",
@@ -1659,14 +1592,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "shujia_user",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_books_user_id_shujia_user_id_fkey",
@@ -1676,14 +1605,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "book_id"
-      ],
+      "columns": ["book_id"],
       "schemaTo": "public",
       "tableTo": "shujia_books",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "shujia_user_books_book_id_shujia_books_id_fkey",
@@ -1692,10 +1617,7 @@
       "table": "shujia_user_books"
     },
     {
-      "columns": [
-        "book_id",
-        "genre_id"
-      ],
+      "columns": ["book_id", "genre_id"],
       "nameExplicit": false,
       "name": "shujia_book_genres_pkey",
       "entityType": "pks",
@@ -1703,10 +1625,7 @@
       "table": "shujia_book_genres"
     },
     {
-      "columns": [
-        "user_book_id",
-        "tag_id"
-      ],
+      "columns": ["user_book_id", "tag_id"],
       "nameExplicit": false,
       "name": "shujia_user_book_tags_pkey",
       "entityType": "pks",
@@ -1714,9 +1633,7 @@
       "table": "shujia_user_book_tags"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_account_pkey",
       "schema": "public",
@@ -1724,9 +1641,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_session_pkey",
       "schema": "public",
@@ -1734,9 +1649,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_user_pkey",
       "schema": "public",
@@ -1744,9 +1657,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_verification_pkey",
       "schema": "public",
@@ -1754,9 +1665,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_book_suggestions_pkey",
       "schema": "public",
@@ -1764,9 +1673,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_books_pkey",
       "schema": "public",
@@ -1774,9 +1681,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_genres_pkey",
       "schema": "public",
@@ -1784,9 +1689,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_notes_pkey",
       "schema": "public",
@@ -1794,9 +1697,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_tags_pkey",
       "schema": "public",
@@ -1804,9 +1705,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "shujia_user_books_pkey",
       "schema": "public",
@@ -1815,9 +1714,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "slug"
-      ],
+      "columns": ["slug"],
       "nullsNotDistinct": false,
       "name": "genres_slug_unique",
       "entityType": "uniques",
@@ -1826,10 +1723,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "name"
-      ],
+      "columns": ["user_id", "name"],
       "nullsNotDistinct": false,
       "name": "tags_user_name_unique",
       "entityType": "uniques",
@@ -1838,10 +1732,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "book_id"
-      ],
+      "columns": ["user_id", "book_id"],
       "nullsNotDistinct": false,
       "name": "user_books_user_book_unique",
       "entityType": "uniques",
@@ -1850,9 +1741,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "token"
-      ],
+      "columns": ["token"],
       "nullsNotDistinct": false,
       "name": "shujia_session_token_key",
       "schema": "public",
@@ -1861,9 +1750,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "shujia_user_email_key",
       "schema": "public",
@@ -1872,9 +1759,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "slug"
-      ],
+      "columns": ["slug"],
       "nullsNotDistinct": false,
       "name": "shujia_books_slug_key",
       "schema": "public",

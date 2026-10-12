@@ -1,7 +1,9 @@
+import { Turnstile } from "@marsidev/react-turnstile";
 import { GoogleLogoIcon, SignInIcon } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "#/lib/auth-client.ts";
+import { verifyTurnstile } from "#/utils/auth.functions.ts";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { LoginFormSchema, RegisterFormSchema } from "./schema";
@@ -16,6 +18,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
+
 function LastMethodBadge() {
   return (
     <span className="bg-secondary text-accent absolute right-1 rounded-xs p-0.5 text-xs font-normal">
@@ -26,11 +30,19 @@ function LastMethodBadge() {
 
 export function LoginModal({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const lastMethod = authClient.getLastUsedLoginMethod();
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
+
+  function resetTurnstile() {
+    turnstileRef.current?.reset();
+    setTurnstileToken(null);
+  }
 
   async function handleLogin(event: React.ChangeEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+
     const { success, data, error } = LoginFormSchema.safeParse({
       email: formData.get("email")?.toString().trim(),
       password: formData.get("password")?.toString(),
@@ -41,9 +53,22 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the CAPTCHA.");
+      return;
+    }
+
+    try {
+      await verifyTurnstile({ data: { token: turnstileToken } });
+    } catch {
+      toast.error("CAPTCHA verification failed. Please try again.");
+      return;
+    }
+
     await authClient.signIn.email(data, {
       onError: ({ error }) => {
         toast.error(error?.message || "Something went wrong. Please try again.");
+        resetTurnstile();
       },
     });
   }
@@ -51,6 +76,7 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
   async function handleRegister(event: React.ChangeEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+
     const { success, data, error } = RegisterFormSchema.safeParse({
       email: formData.get("email")?.toString().trim(),
       password: formData.get("password")?.toString(),
@@ -62,19 +88,47 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the CAPTCHA.");
+      return;
+    }
+
+    try {
+      await verifyTurnstile({ data: { token: turnstileToken } });
+    } catch {
+      toast.error("CAPTCHA verification failed. Please try again.");
+      resetTurnstile();
+      return;
+    }
+
     await authClient.signUp.email(data, {
       onError: ({ error }) => {
         toast.error(error?.message || "Something went wrong. Please try again.");
+        resetTurnstile();
       },
     });
   }
 
   const handleGoogleSignIn = async () => {
+    if (!turnstileToken) {
+      toast.error("Please complete the CAPTCHA.");
+      return;
+    }
+
+    try {
+      await verifyTurnstile({ data: { token: turnstileToken } });
+    } catch {
+      toast.error("CAPTCHA verification failed. Please try again.");
+      resetTurnstile();
+      return;
+    }
+
     await authClient.signIn.social(
       { provider: "google", callbackURL: "/?signedIn=true" },
       {
         onError: ({ error }) => {
           toast.error(error?.message || "Something went wrong. Please try again.");
+          resetTurnstile();
         },
       },
     );
@@ -96,9 +150,9 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
       <DialogOverlay className="bg-primary/35" />
       <DialogContent
         showCloseButton={false}
-        className="bg-background h-svh w-full max-w-svw items-center p-10 shadow-2xl sm:h-fit sm:max-w-md"
+        className="bg-background h-svh w-full max-w-svw items-center shadow-2xl sm:h-fit sm:max-w-md"
       >
-        <DialogHeader>
+        <DialogHeader className="p-4">
           <DialogTitle className="text-accent text-xs tracking-[0.25em] uppercase">
             Your reading room
             <p
@@ -144,7 +198,7 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
                 name="email"
                 required
                 autoFocus
-                className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 outline-none"
+                className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 shadow-none outline-none"
               />
             </label>
             <label className="text-primary block text-sm">
@@ -156,10 +210,19 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
                 className="border-border focus:border-accent mt-2 w-full border-b bg-transparent px-0 py-2 outline-none"
               />
             </label>
+            <Turnstile
+              ref={turnstileRef}
+              siteKey="0x4AAAAAABfvVQa11KRNyY2L"
+              onSuccess={(token) => setTurnstileToken(token)}
+              className="turnstile flex w-full justify-center"
+              onExpire={resetTurnstile}
+              onError={resetTurnstile}
+            />
 
             <Button
               type="submit"
-              className="relative mt-3 flex w-full items-center px-5 py-3 text-sm font-bold"
+              disabled={!turnstileToken}
+              className="relative mt-3 flex w-full items-center px-5 py-3 text-sm font-bold disabled:opacity-50"
               variant="outline"
             >
               <SignInIcon size={20} weight="bold" />
@@ -170,8 +233,9 @@ export function LoginModal({ children }: { children: React.ReactNode }) {
 
           <Button
             onClick={handleGoogleSignIn}
+            disabled={!turnstileToken}
             variant="outline"
-            className="relative text-sm font-bold"
+            className="relative text-sm font-bold disabled:opacity-50"
           >
             <GoogleLogoIcon size={20} weight="bold" />
             Sign in with Google

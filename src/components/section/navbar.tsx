@@ -9,9 +9,9 @@ export function Navbar() {
   return (
     <header className="border-border mx-auto flex w-full max-w-7xl items-center justify-between border-b px-5 py-5 md:px-10">
       <Link to="/" className="text-primary flex-1 font-serif text-2xl tracking-tight">
-        unbound<span className="text-accent">.</span>
+        shūjià<span className="text-accent">.</span>
       </Link>
-      <nav className="text-muted-foreground hidden flex-1 items-center gap-8 text-sm *:p-1 md:flex">
+      <nav className="text-muted-foreground hidden flex-1 items-center gap-8 text-sm *:p-1 *:text-nowrap md:flex">
         <a href="#collection" className="text-foreground">
           Collection
         </a>

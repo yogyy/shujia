@@ -17,7 +17,11 @@ interface Genre {
   name: string;
 }
 
-export function GenreSelector() {
+interface Props {
+  initialValue?: any[];
+}
+
+export function GenreSelector({ initialValue }: Props) {
   const anchor = useComboboxAnchor();
 
   const { data: genres } = useQuery<Genre[]>({
@@ -27,7 +31,7 @@ export function GenreSelector() {
   });
 
   return (
-    <Combobox multiple name="genres" autoHighlight items={genres}>
+    <Combobox multiple name="genres" autoHighlight items={genres} value={initialValue}>
       <ComboboxChips ref={anchor} className="focus-within:border-accent ring-0 focus-within:ring-0">
         <ComboboxValue>
           {(values) => (

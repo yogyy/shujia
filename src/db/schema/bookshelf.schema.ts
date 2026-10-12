@@ -1,16 +1,16 @@
 import {
   index,
   integer,
-  jsonb,
   pgEnum,
-  pgTableCreator,
   primaryKey,
   text,
   timestamp,
   unique,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.schema";
+import { shujiaTable } from "./table.ts";
 
 // Enums
 export const bookStatusEnum = pgEnum("shujia_book_status", [
@@ -24,15 +24,7 @@ export const bookFormatEnum = pgEnum("shujia_book_format", ["physical", "ebook",
 
 export const visibilityEnum = pgEnum("shujia_visibility", ["private", "public", "unlisted"]);
 
-export const suggestionStatusEnum = pgEnum("shujia_suggestion_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
-
-const pgTable = pgTableCreator((name) => `shujia_${name}`);
-
-export const books = pgTable(
+export const books = shujiaTable(
   "books",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -57,7 +49,7 @@ export const books = pgTable(
   (table) => [index("books_title_idx").on(table.title)],
 );
 
-export const genres = pgTable(
+export const genres = shujiaTable(
   "genres",
   {
     id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
@@ -67,7 +59,7 @@ export const genres = pgTable(
   (table) => [unique("genres_slug_unique").on(table.slug)],
 );
 
-export const bookGenres = pgTable(
+export const bookGenres = shujiaTable(
   "book_genres",
   {
     bookId: uuid("book_id")
@@ -90,7 +82,7 @@ export const bookGenres = pgTable(
   ],
 );
 
-export const userBooks = pgTable(
+export const userBooks = shujiaTable(
   "user_books",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -126,7 +118,7 @@ export const userBooks = pgTable(
   ],
 );
 
-export const notes = pgTable(
+export const notes = shujiaTable(
   "notes",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -157,7 +149,7 @@ export const notes = pgTable(
   ],
 );
 
-export const tags = pgTable(
+export const tags = shujiaTable(
   "tags",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -178,7 +170,7 @@ export const tags = pgTable(
   ],
 );
 
-export const userBookTags = pgTable(
+export const userBookTags = shujiaTable(
   "user_book_tags",
   {
     userBookId: uuid("user_book_id")
@@ -196,23 +188,35 @@ export const userBookTags = pgTable(
   (table) => [primaryKey({ columns: [table.userBookId, table.tagId] })],
 );
 
-export const bookSuggestions = pgTable(
-  "book_suggestions",
+export const comments = shujiaTable(
+  "comments", // physical table: shujia_comments
   {
     id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
     bookId: uuid("book_id")
       .notNull()
-      .references(() => books.id, {
-        onDelete: "cascade",
-      }),
-    suggestedBy: text("suggested_by").references(() => user.id, {
-      onDelete: "set null",
+      .references(() => books.id, { onDelete: "cascade" }),
+
+    // NULL = top-level comment, set = a reply to that comment (one level only)
+    parentId: uuid("parent_id").references((): AnyPgColumn => comments.id, {
+      onDelete: "cascade",
     }),
 
-    changes: jsonb("changes").notNull(),
-    note: text("note"),
-    status: suggestionStatusEnum("status").notNull().default("pending"),
+    content: text("content").notNull(),
+
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
   },
-  (table) => [index("book_suggestions_book_id_idx").on(table.bookId)],
+  (table) => [
+    index("comments_book_id_idx").on(table.bookId),
+    index("comments_user_id_idx").on(table.userId),
+    index("comments_parent_id_idx").on(table.parentId),
+  ],
 );

@@ -5,7 +5,8 @@ import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Toaster } from "sonner";
 import { NotFound } from "#/components/not-found.tsx";
 import devtools from "#/integrations/tanstack-query/devtools.tsx";
-import appCss from "../styles.css?url";
+import { seo } from "#/lib/seo";
+import appCss from "#/styles.css?url";
 
 import type { QueryClient } from "@tanstack/react-query";
 interface MyRouterContext {
@@ -22,19 +23,32 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        title: "shūjià. — Books for the in-between",
-      },
-      {
-        name: "description",
-        content: "A considered collection of novels, essays, and poems.",
-      },
+      ...seo({
+        title: "shūjià. | Books for the in-between",
+        description: `A considered collection of novels, essays, and poems. `,
+      }),
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
       {
-        rel: "stylesheet",
-        href: appCss,
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
       },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon-32x32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/favicon-16x16.png",
+      },
+      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
+      { rel: "icon", href: "/favicon.ico" },
     ],
   }),
   shellComponent: RootDocument,

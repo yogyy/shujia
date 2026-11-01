@@ -4,4 +4,17 @@
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    "DATABASE_URL": "",
+    "BETTER_AUTH_SECRET": "",
+    // "BASE_URL": "http://localhost:3000",
+    "BASE_URL": "", // live site
+    "GOOGLE_CLIENT_ID": "",
+    "GOOGLE_CLIENT_SECRET": "",
+    "R2_PUBLIC_URL": "",
+
+    "TURNSTILE_SITE_KEY": "",
+    "TURNSTILE_SECRET_KEY": "",
+  },
+  "r2_buckets": [{ "binding": "R2", "bucket_name": "" }],
 }

@@ -24,9 +24,9 @@ export function DropdownMenuAvatar() {
       <DropdownMenuTrigger
         render={
           <Button variant="ghost" size="icon" className="rounded-xs">
-            <Avatar>
-              <AvatarImage src={data?.user.image!} className="rounded-sm" alt={data?.user.name} />
-              <AvatarFallback>{data?.user.name.slice(0, 2)}</AvatarFallback>
+            <Avatar className="rounded-sm">
+              <AvatarImage className="rounded-sm" src={data?.user.image!} alt={data?.user.name} />
+              <AvatarFallback className="rounded-sm">{data?.user.name.slice(0, 2)}</AvatarFallback>
             </Avatar>
           </Button>
         }

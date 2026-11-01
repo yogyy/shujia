@@ -1,5 +1,3 @@
-export { cn, type ClassValue } from "cnfast";
-
 export function slugify(value: string) {
   return value
     .normalize("NFKD")

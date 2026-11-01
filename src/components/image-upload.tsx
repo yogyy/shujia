@@ -1,5 +1,5 @@
 import { UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
-import { cn } from "cnfast";
+import { cn } from "cn";
 import { useRef, useState } from "react";
 import { ALLOWED_TYPES, MAX_SIZE } from "#/utils/image.utils.ts";
 

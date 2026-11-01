@@ -1,6 +1,6 @@
 import { Link, type LinkComponentProps } from "@tanstack/react-router";
+import { cn } from "cn";
 import { useDisplayMode } from "#/lib/store.ts";
-import { cn } from "#/lib/utils.ts";
 import { Skeleton } from "../ui/skeleton";
 
 import type { Book } from "#/utils/books.functions.ts";

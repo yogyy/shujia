@@ -1,6 +1,6 @@
 import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
+import { cn } from "cn";
 import { useState } from "react";
-import { cn } from "#/lib/utils.ts";
 
 interface BookSummaryProps {
   description: string | null;

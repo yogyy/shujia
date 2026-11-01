@@ -1,10 +1,11 @@
 import { PlusIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { cn } from "cn";
 import * as React from "react";
 import { toast } from "sonner";
 import { useMediaQuery } from "#/hooks/useMediaQuery.ts";
 import { authClient } from "#/lib/auth-client.ts";
-import { cn, slugify } from "#/lib/utils.ts";
+import { slugify } from "#/lib/utils.ts";
 import { createSuggestion } from "#/utils/books.functions.ts";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
@@ -40,7 +41,7 @@ interface GenreSuggestionProps {
 
 export function GenreSuggestion({ bookId, currentGenreIds }: GenreSuggestionProps) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery("(min-width: 768px)"); // this cause hydration-mismatch
 
   const trigger = (
     <Button variant="secondary" size="xs" className="rounded-sm border">

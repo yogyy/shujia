@@ -1,11 +1,12 @@
 import { PencilSimpleLineIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
+import { cn } from "cn";
 import { useRef, useState } from "react";
 import { toast, type ExternalToast } from "sonner";
 import { useUploadImage } from "#/hooks/useUploadImage.ts";
 import { authClient } from "#/lib/auth-client.ts";
-import { cn, filterEmptyValues } from "#/lib/utils.ts";
-import { suggestBookEdit, updateBook } from "#/utils/books.functions.ts";
+import { filterEmptyValues } from "#/lib/utils.ts";
+import { createSuggestion, updateBook } from "#/utils/books.functions.ts";
 import { FormatSelector } from "../book/format-selection";
 import { GenreSelector } from "../book/genre-selection";
 import { ImageUpload, uploadToR2 } from "../image-upload";
@@ -59,7 +60,7 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
   const isRegularUser = session?.user.role === "user";
 
   const suggestionMutation = useMutation({
-    mutationFn: suggestBookEdit,
+    mutationFn: createSuggestion,
     onSuccess: () => {
       formRef.current?.reset();
       toast.success("Thanks! Your suggestion was submitted for review.", toastOptions);
@@ -81,7 +82,7 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
   const { mutateAsync: uploadImage, isPending: isUploading } = useMutation({
     mutationFn: uploadToR2,
     mutationKey: ["image-upload", "edit-book"],
-    onSuccess: () => toast.success("Image uploaded."),
+    onSuccess: () => toast.success("Image uploaded.", toastOptions),
     onError: (error) => toast.error(error.message),
   });
 
@@ -113,7 +114,13 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
 
     if (isRegularUser) {
       suggestionMutation.mutate({
-        data: { note: note as string, changes: cleanData, suggestedBy: session?.user.id, bookId },
+        data: {
+          bookId,
+          type: "book_edit",
+          note: note as string,
+          suggestedBy: session?.user.id,
+          changes: { type: "book_edit", ...cleanData },
+        },
       });
     } else {
       updateBookMutation.mutate({ data: { ...cleanData, id: bookId } });

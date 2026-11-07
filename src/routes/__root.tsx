@@ -3,9 +3,10 @@ import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/reac
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Toaster } from "sonner";
-import { NotFound } from "#/components/not-found.tsx";
+import { TooltipProvider } from "#/components/ui/tooltip.tsx";
 import devtools from "#/integrations/tanstack-query/devtools.tsx";
 import { seo } from "#/lib/seo";
+import { NotFoundRoot } from "#/routes/-not-found-page.tsx";
 import appCss from "#/styles.css?url";
 
 import type { QueryClient } from "@tanstack/react-query";
@@ -22,6 +23,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         name: "viewport",
         content: "width=device-width, initial-scale=1",
+      },
+      {
+        name: "google-site-verification",
+        content: "TSUAH5lqhCWumVSjCmwjjFfgPPepNv",
       },
       ...seo({
         title: "shūjià. | Books for the in-between",
@@ -52,7 +57,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
-  notFoundComponent: NotFound,
+  notFoundComponent: NotFoundRoot,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -62,7 +67,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="antialiased">
-        <NuqsAdapter>{children}</NuqsAdapter>
+        <NuqsAdapter>
+          <TooltipProvider>{children}</TooltipProvider>
+        </NuqsAdapter>
         <Toaster
           position="top-center"
           expand

@@ -23,6 +23,7 @@ body {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  position: relative;
 }
 
 @theme inline {
@@ -196,4 +197,21 @@ select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px var(--color-background) inset !important;
   box-shadow: 0 0 0 1000px var(--color-background) inset !important;
   -webkit-text-fill-color: var(--color-foreground) !important;
+}
+
+/*
+Source - https://stackoverflow.com/a/4298216
+Posted by antonj, modified by community. See post 'Timeline' for change history
+Retrieved 2026-08-25, License - CC BY-SA 4.0
+*/
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
 }

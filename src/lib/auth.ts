@@ -9,6 +9,7 @@ import * as schema from "@/db/schema/auth.schema";
 export const auth = (env: Cloudflare.Env) =>
   betterAuth({
     baseURL: env.BASE_URL,
+    trustedOrigins: ["http://localhost:3000", "http://192.168.1.4:3000"],
     database: drizzleAdapter(createDb(env.DATABASE_URL!), {
       provider: "pg",
       schema,

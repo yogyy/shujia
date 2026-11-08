@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as adminRouteRouteImport } from './routes/(admin)/route'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as adminSuggestionRouteImport } from './routes/(admin)/suggestion'
 import { Route as ApiGenresRouteImport } from './routes/api/genres'
-import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as BookSlugRouteImport } from './routes/book/$slug'
+import { Route as adminDashboardIndexRouteImport } from './routes/(admin)/dashboard/index'
+import { Route as adminDashboardUserRouteImport } from './routes/(admin)/dashboard/user'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiBooksIndexRouteImport } from './routes/api/books/index'
 import { Route as ApiBooksGenresRouteImport } from './routes/api/books/genres'
 import { Route as ApiImagesKeyRouteImport } from './routes/api/images/$key'
+import { Route as ApiBooksCoverIndexRouteImport } from './routes/api/books/cover/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const adminRouteRoute = adminRouteRouteImport.update({
+  id: '/(admin)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const adminSuggestionRoute = adminSuggestionRouteImport.update({
+  id: '/suggestion',
+  path: '/suggestion',
+  getParentRoute: () => adminRouteRoute,
+} as any)
 const ApiGenresRoute = ApiGenresRouteImport.update({
   id: '/api/genres',
   path: '/api/genres',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiUploadRoute = ApiUploadRouteImport.update({
-  id: '/api/upload',
-  path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookSlugRoute = BookSlugRouteImport.update({
   id: '/book/$slug',
   path: '/book/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const adminDashboardIndexRoute = adminDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => adminRouteRoute,
+} as any)
+const adminDashboardUserRoute = adminDashboardUserRouteImport.update({
+  id: '/dashboard/user',
+  path: '/dashboard/user',
+  getParentRoute: () => adminRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -58,80 +88,120 @@ const ApiImagesKeyRoute = ApiImagesKeyRouteImport.update({
   path: '/api/images/$key',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBooksCoverIndexRoute = ApiBooksCoverIndexRouteImport.update({
+  id: '/api/books/cover/',
+  path: '/api/books/cover/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/search': typeof SearchRoute
+  '/suggestion': typeof adminSuggestionRoute
   '/api/genres': typeof ApiGenresRoute
-  '/api/upload': typeof ApiUploadRoute
   '/book/$slug': typeof BookSlugRoute
+  '/dashboard/user': typeof adminDashboardUserRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
+  '/dashboard/': typeof adminDashboardIndexRoute
   '/api/books/': typeof ApiBooksIndexRoute
+  '/api/books/cover/': typeof ApiBooksCoverIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/search': typeof SearchRoute
+  '/suggestion': typeof adminSuggestionRoute
   '/api/genres': typeof ApiGenresRoute
-  '/api/upload': typeof ApiUploadRoute
   '/book/$slug': typeof BookSlugRoute
+  '/dashboard/user': typeof adminDashboardUserRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
+  '/dashboard': typeof adminDashboardIndexRoute
   '/api/books': typeof ApiBooksIndexRoute
+  '/api/books/cover': typeof ApiBooksCoverIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(admin)': typeof adminRouteRouteWithChildren
+  '/bookmarks': typeof BookmarksRoute
+  '/search': typeof SearchRoute
+  '/(admin)/suggestion': typeof adminSuggestionRoute
   '/api/genres': typeof ApiGenresRoute
-  '/api/upload': typeof ApiUploadRoute
   '/book/$slug': typeof BookSlugRoute
+  '/(admin)/dashboard/user': typeof adminDashboardUserRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
+  '/(admin)/dashboard/': typeof adminDashboardIndexRoute
   '/api/books/': typeof ApiBooksIndexRoute
+  '/api/books/cover/': typeof ApiBooksCoverIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bookmarks'
+    | '/search'
+    | '/suggestion'
     | '/api/genres'
-    | '/api/upload'
     | '/book/$slug'
+    | '/dashboard/user'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
+    | '/dashboard/'
     | '/api/books/'
+    | '/api/books/cover/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bookmarks'
+    | '/search'
+    | '/suggestion'
     | '/api/genres'
-    | '/api/upload'
     | '/book/$slug'
+    | '/dashboard/user'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
+    | '/dashboard'
     | '/api/books'
+    | '/api/books/cover'
   id:
     | '__root__'
     | '/'
+    | '/(admin)'
+    | '/bookmarks'
+    | '/search'
+    | '/(admin)/suggestion'
     | '/api/genres'
-    | '/api/upload'
     | '/book/$slug'
+    | '/(admin)/dashboard/user'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
+    | '/(admin)/dashboard/'
     | '/api/books/'
+    | '/api/books/cover/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  adminRouteRoute: typeof adminRouteRouteWithChildren
+  BookmarksRoute: typeof BookmarksRoute
+  SearchRoute: typeof SearchRoute
   ApiGenresRoute: typeof ApiGenresRoute
-  ApiUploadRoute: typeof ApiUploadRoute
   BookSlugRoute: typeof BookSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBooksGenresRoute: typeof ApiBooksGenresRoute
   ApiImagesKeyRoute: typeof ApiImagesKeyRoute
   ApiBooksIndexRoute: typeof ApiBooksIndexRoute
+  ApiBooksCoverIndexRoute: typeof ApiBooksCoverIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -143,18 +213,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(admin)': {
+      id: '/(admin)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof adminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(admin)/suggestion': {
+      id: '/(admin)/suggestion'
+      path: '/suggestion'
+      fullPath: '/suggestion'
+      preLoaderRoute: typeof adminSuggestionRouteImport
+      parentRoute: typeof adminRouteRoute
+    }
     '/api/genres': {
       id: '/api/genres'
       path: '/api/genres'
       fullPath: '/api/genres'
       preLoaderRoute: typeof ApiGenresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/upload': {
-      id: '/api/upload'
-      path: '/api/upload'
-      fullPath: '/api/upload'
-      preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book/$slug': {
@@ -163,6 +254,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/book/$slug'
       preLoaderRoute: typeof BookSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(admin)/dashboard/': {
+      id: '/(admin)/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof adminDashboardIndexRouteImport
+      parentRoute: typeof adminRouteRoute
+    }
+    '/(admin)/dashboard/user': {
+      id: '/(admin)/dashboard/user'
+      path: '/dashboard/user'
+      fullPath: '/dashboard/user'
+      preLoaderRoute: typeof adminDashboardUserRouteImport
+      parentRoute: typeof adminRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -192,18 +297,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiImagesKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/books/cover/': {
+      id: '/api/books/cover/'
+      path: '/api/books/cover'
+      fullPath: '/api/books/cover/'
+      preLoaderRoute: typeof ApiBooksCoverIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface adminRouteRouteChildren {
+  adminSuggestionRoute: typeof adminSuggestionRoute
+  adminDashboardUserRoute: typeof adminDashboardUserRoute
+  adminDashboardIndexRoute: typeof adminDashboardIndexRoute
+}
+
+const adminRouteRouteChildren: adminRouteRouteChildren = {
+  adminSuggestionRoute: adminSuggestionRoute,
+  adminDashboardUserRoute: adminDashboardUserRoute,
+  adminDashboardIndexRoute: adminDashboardIndexRoute,
+}
+
+const adminRouteRouteWithChildren = adminRouteRoute._addFileChildren(
+  adminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  adminRouteRoute: adminRouteRouteWithChildren,
+  BookmarksRoute: BookmarksRoute,
+  SearchRoute: SearchRoute,
   ApiGenresRoute: ApiGenresRoute,
-  ApiUploadRoute: ApiUploadRoute,
   BookSlugRoute: BookSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBooksGenresRoute: ApiBooksGenresRoute,
   ApiImagesKeyRoute: ApiImagesKeyRoute,
   ApiBooksIndexRoute: ApiBooksIndexRoute,
+  ApiBooksCoverIndexRoute: ApiBooksCoverIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

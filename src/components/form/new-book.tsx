@@ -46,7 +46,7 @@ export function NewBookForm() {
   const { mutateAsync: uploadImage, isPending: isUploading } = useMutation({
     mutationFn: uploadToR2,
     mutationKey: ["image-upload", "new-book"],
-    onSuccess: () => toast.success("Image uploaded."),
+    onSuccess: () => toast.success("Image uploaded.", { position: "top-left" }),
     onError: (error) => toast.error(error.message),
   });
 
@@ -94,6 +94,7 @@ export function NewBookForm() {
         render={
           <Button
             variant="outline"
+
             className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-2 border p-2 pr-3 text-sm"
           />
         }

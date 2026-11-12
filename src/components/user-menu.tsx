@@ -1,6 +1,7 @@
 import {
   BellIcon,
   BookmarksIcon,
+  EqualizerIcon,
   IdentificationCardIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
@@ -33,25 +34,41 @@ export function DropdownMenuAvatar() {
       />
       <DropdownMenuContent align="end" sideOffset={8}>
         <DropdownMenuGroup>
+          {data?.user.role === "admin" && (
+            <>
+              <DropdownMenuItem
+                className="flex w-full cursor-pointer items-center gap-2"
+                render={<Link to="/dashboard" />}
+              >
+                <EqualizerIcon />
+                Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuItem disabled>
             <IdentificationCardIcon />
             Account
           </DropdownMenuItem>
           <DropdownMenuItem
-            render={
-              <Link to="/bookmarks" className="flex w-full cursor-pointer items-center gap-2">
-                <BookmarksIcon />
-                Bookmarks
-              </Link>
-            }
-          />
+            className="flex w-full cursor-pointer items-center gap-2"
+            render={<Link to="/bookmarks" />}
+          >
+            <BookmarksIcon />
+            Bookmarks
+          </DropdownMenuItem>
           <DropdownMenuItem disabled>
             <BellIcon />
             Notifications
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => authClient.signOut()}>
+        <DropdownMenuItem
+          className="w-full justify-baseline"
+          onClick={() => authClient.signOut()}
+          nativeButton
+          render={<Button variant="ghost" />}
+        >
           <SignOutIcon />
           Sign Out
         </DropdownMenuItem>

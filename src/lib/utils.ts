@@ -1,3 +1,5 @@
+import { UAParser } from "ua-parser-js";
+
 export function slugify(value: string) {
   return value
     .normalize("NFKD")
@@ -7,6 +9,21 @@ export function slugify(value: string) {
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+}
+
+export const formatDate = (d: string | Date) =>
+  new Date(d).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+export function parseDevice(userAgent?: string | null) {
+  if (!userAgent) return "Unknown device";
+  const { browser, os } = UAParser(userAgent);
+  const browserName = browser.name ?? "Unknown browser";
+  const osName = os.name ?? "Unknown OS";
+  return `${browserName} on ${osName}`;
 }
 
 export function filterEmptyValues<T extends Record<string, any>>(

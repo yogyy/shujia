@@ -149,7 +149,8 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
               Reader contribution
             </DrawerTitle>
             <DrawerDescription className="text-primary mt-3 font-serif text-[clamp(24px,6vw,2.25rem)] text-pretty">
-              Suggest an edit for &ldquo;{bookTitle}&rdquo;
+              {isRegularUser ? "Suggest an edit " : "Edit "}
+              &ldquo;{bookTitle}&rdquo;
             </DrawerDescription>
           </DrawerHeader>
           <form

@@ -1,9 +1,9 @@
 import { Link, type LinkComponentProps } from "@tanstack/react-router";
 import { cn } from "cn";
-import { useDisplayMode } from "#/lib/store.ts";
+import { useDisplayMode } from "#/lib/store";
 import { Skeleton } from "../ui/skeleton";
 
-import type { Book } from "#/utils/books.functions.ts";
+import type { Book } from "#/types";
 
 export interface BookCardProps extends LinkComponentProps {
   book: Omit<Book, "description">;

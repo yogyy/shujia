@@ -30,7 +30,7 @@ export const books = shujiaTable(
     id: uuid("id").defaultRandom().primaryKey(),
 
     slug: text("slug").notNull().unique(),
-    bookFormat: bookFormatEnum("book_format").default("ebook"),
+    bookFormat: bookFormatEnum("book_format").default("ebook").notNull(),
 
     title: text("title").notNull(),
     author: text("author"),
@@ -44,9 +44,18 @@ export const books = shujiaTable(
         onDelete: "restrict",
       }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
   },
-  (table) => [index("books_title_idx").on(table.title)],
+  (table) => [
+    index("books_title_idx").on(table.title),
+    // sort default: createdAt desc, id desc (tie-breaker)
+    index("books_created_at_idx").on(table.createdAt.desc(), table.id.desc()),
+    // FK: Postgres TIDAK otomatis bikin index untuk foreign key
+    index("books_created_by_idx").on(table.createdBy),
+  ],
 );
 
 export const genres = shujiaTable(

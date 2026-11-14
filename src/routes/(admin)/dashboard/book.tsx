@@ -1,39 +1,89 @@
-import { BookOpenIcon, ShieldCheckIcon, UserIcon, CalendarBlankIcon } from "@phosphor-icons/react";
-import { useMutation } from "@tanstack/react-query";
+import { ShieldCheckIcon } from "@phosphor-icons/react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  FlexRender,
+  useTable,
+  type PaginationState,
+  type SortingState,
+} from "@tanstack/react-table";
 import { useState } from "react";
-import { toast } from "sonner";
-import { DeleteButton } from "#/components/dashboard/delete-button.tsx";
+import { bookColumns, bookFeatures } from "#/components/dashboard/book/columns.tsx";
 import { AdminError } from "#/components/dashboard/error.tsx";
-import { FormatBadge, Stat, TableData, TableHeader } from "#/components/dashboard/sub.tsx";
-import { formatDate } from "#/lib/utils.ts";
-import { getAllBooksAdmin, deleteBookAdmin } from "#/utils/admin/index.functions.ts";
+import { Stat } from "#/components/dashboard/sub.tsx";
+import { SortIcon } from "#/components/sort-icon.tsx";
+import { Button } from "#/components/ui/button.tsx";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/components/ui/table.tsx";
+import { useDebounce } from "#/hooks/useDebounce.ts";
+import { getAllBooksAdmin } from "#/utils/admin/index.functions.ts";
+
+export type AdminBooksResult = Awaited<ReturnType<typeof getAllBooksAdmin>>;
+export type AdminBookRow = AdminBooksResult["books"][number];
 
 export const Route = createFileRoute("/(admin)/dashboard/book")({
-  loader: async () => getAllBooksAdmin(),
   component: BookDashboard,
   errorComponent: AdminError,
 });
 
+const EMPTY: AdminBookRow[] = [];
+
 function BookDashboard() {
-  const books = Route.useLoaderData();
   const [search, setSearch] = useState("");
-  const { queryClient } = Route.useRouteContext();
-
-  const filtered = books.filter(
-    (b) =>
-      b.title.toLowerCase().includes(search.toLowerCase()) ||
-      (b.author ?? "").toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const deleteMutation = useMutation({
-    mutationFn: (bookId: string) => deleteBookAdmin({ data: { bookId } }),
-    onSuccess: () => {
-      toast.success("Book deleted");
-      queryClient.invalidateQueries();
-    },
-    onError: () => toast.error("Failed to delete book"),
+  const debouncedSearch = useDebounce(search, 300);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
   });
+
+  const sort = sorting[0];
+  const { data, isPlaceholderData } = useQuery({
+    queryKey: [
+      "admin",
+      "books",
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      debouncedSearch,
+    ],
+    queryFn: () =>
+      getAllBooksAdmin({
+        data: {
+          page: pagination.pageIndex + 1,
+          pageSize: pagination.pageSize,
+          search: debouncedSearch,
+          sortBy: sort?.id as "title" | "author" | "createdAt" | undefined,
+          sortDir: sort ? (sort.desc ? "desc" : "asc") : undefined,
+        },
+      }),
+    placeholderData: keepPreviousData, // data halaman lama tetap tampil saat fetch halaman baru
+  });
+
+  const table = useTable({
+    features: bookFeatures,
+    columns: bookColumns,
+    data: data?.books ?? EMPTY,
+
+    manualPagination: true,
+    manualSorting: true,
+    rowCount: data?.total ?? 0,
+    state: { pagination, sorting },
+    onPaginationChange: setPagination,
+    onSortingChange: (updater) => {
+      setSorting(updater);
+      setPagination((p) => ({ ...p, pageIndex: 0 })); // balik ke halaman 1
+    },
+  });
+
+  const from = data && data.total > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const to = data ? Math.min(data.page * data.pageSize, data.total) : 0;
 
   return (
     <>
@@ -54,146 +104,114 @@ function BookDashboard() {
 
           {/* Stats row */}
           <div className="mt-8 flex flex-wrap gap-6">
-            <Stat label="Total books" value={books.length} />
-            <Stat
-              label="Authors"
-              value={new Set(books.map((b) => b.author).filter(Boolean)).size}
-            />
+            <Stat label="Total books" value={table.getRowCount()} />
           </div>
         </section>
       </div>
-
       {/* Table */}
-      <section className="mx-auto max-w-7xl px-5 py-10 md:px-10">
-        {/* Search */}
+      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-10">
         <div className="mb-6 flex items-center gap-3">
+          <label htmlFor="admin-book-search" className="sr-only">
+            Filter books by title
+          </label>
           <input
             id="admin-book-search"
             type="search"
-            placeholder="Filter by title or author…"
+            placeholder="Filter by title…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              // balik ke halaman 1 setiap search berubah
+              setPagination((p) => ({ ...p, pageIndex: 0 }));
+            }}
             className="border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full max-w-sm border px-3 py-2 text-sm outline-none focus:ring-1"
           />
           <span className="text-muted-foreground ml-auto hidden text-xs md:block">
-            {filtered.length} / {books.length} entries
+            {data?.total ? `${from}-${to} of ${data.total} entries` : "No entries"}
           </span>
         </div>
 
-        {/* Desktop table */}
-        <div className="border-border hidden overflow-x-auto border md:block">
-          <table className="w-full table-fixed text-sm">
-            <thead>
-              <tr className="border-border border-b">
-                <TableHeader className="w-[35%]">Title</TableHeader>
-                <TableHeader className="w-[18%]">Author</TableHeader>
-                <TableHeader className="w-[15%]">Format</TableHeader>
-                <TableHeader className="w-[18%]">Added by</TableHeader>
-                <TableHeader className="w-[10%]">Date</TableHeader>
-                <TableHeader className="w-[4%]" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-muted-foreground py-16 text-center text-xs">
-                    No books match your filter.
-                  </td>
-                </tr>
-              )}
-              {filtered.map((book) => (
-                <tr
-                  key={book.id}
-                  className="border-border hover:bg-muted/30 border-b transition-colors"
-                >
-                  <TableData>
-                    <div className="flex items-center gap-3">
-                      {book.coverUrl ? (
-                        <img
-                          src={book.coverUrl}
-                          alt={book.title}
-                          className="border-border h-10 w-7 shrink-0 border object-cover"
-                        />
-                      ) : (
-                        <div className="border-border bg-muted flex h-10 w-7 shrink-0 items-center justify-center border">
-                          <BookOpenIcon className="text-muted-foreground size-3.5" />
-                        </div>
-                      )}
-                      <span className="text-foreground truncate font-medium">{book.title}</span>
-                    </div>
-                  </TableData>
-                  <TableData className="text-muted-foreground truncate">
-                    {book.author ?? "—"}
-                  </TableData>
-                  <TableData>
-                    <FormatBadge format={book.bookFormat} />
-                  </TableData>
-                  <TableData className="text-muted-foreground truncate">
-                    {book.creatorName ?? book.createdById.slice(0, 8)}
-                  </TableData>
-                  <TableData className="text-muted-foreground text-xs">
-                    {formatDate(book.createdAt)}
-                  </TableData>
-                  <TableData>
-                    <DeleteButton
-                      bookTitle={book.title}
-                      isPending={deleteMutation.isPending}
-                      onConfirm={() => deleteMutation.mutate(book.id)}
-                    />
-                  </TableData>
-                </tr>
+        <div className="border-border w-full border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                  {headerGroup.headers.map((header) => {
+                    const canSort = header.column.getCanSort();
+                    const sorted = header.column.getIsSorted();
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className="text-muted-foreground py-3 text-xs tracking-widest first:pl-10"
+                      >
+                        {canSort ? (
+                          <button
+                            type="button"
+                            onClick={header.column.getToggleSortingHandler()}
+                            className="hover:[&>svg]:text-accent flex cursor-pointer items-center px-2 select-none"
+                          >
+                            {header.isPlaceholder}
+                            <FlexRender header={header} />
+                            <SortIcon isSorted={sorted} />
+                          </button>
+                        ) : (
+                          <FlexRender header={header} />
+                        )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableHeader>
+            <TableBody className="**:data-[slot=table-cell]:last:w-10">
+              {table.getRowModel().rows.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={bookColumns.length}
+                    className="text-muted-foreground py-16 text-center text-xs"
+                  >
+                    No books match your filter.
+                  </TableCell>
+                </TableRow>
+              )}
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getAllCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      <table.FlexRender cell={cell} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
 
-        {/* Mobile cards */}
-        <div className="space-y-3 md:hidden">
-          {filtered.length === 0 && (
-            <p className="text-muted-foreground py-10 text-center text-xs">
-              No books match your filter.
-            </p>
-          )}
-          {filtered.map((book) => (
-            <div key={book.id} className="border-border border p-4">
-              <div className="flex gap-3">
-                {book.coverUrl ? (
-                  <img
-                    src={book.coverUrl}
-                    alt={book.title}
-                    className="border-border h-16 w-11 shrink-0 border object-cover"
-                  />
-                ) : (
-                  <div className="border-border bg-muted flex h-16 w-11 shrink-0 items-center justify-center border">
-                    <BookOpenIcon className="text-muted-foreground size-4" />
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-foreground truncate font-medium">{book.title}</p>
-                  <p className="text-muted-foreground mt-0.5 text-xs">{book.author ?? "—"}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <FormatBadge format={book.bookFormat} />
-                    <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                      <UserIcon className="size-3" />
-                      {book.creatorName ?? book.createdById.slice(0, 8)}
-                    </span>
-                    <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                      <CalendarBlankIcon className="size-3" />
-                      {formatDate(book.createdAt)}
-                    </span>
-                  </div>
-                </div>
-                <div className="shrink-0">
-                  <DeleteButton
-                    bookTitle={book.title}
-                    isPending={deleteMutation.isPending}
-                    onConfirm={() => deleteMutation.mutate(book.id)}
-                  />
-                </div>
-              </div>
+        {data?.pageCount && data?.pageCount >= 1 && (
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <span className="text-muted-foreground text-xs">
+              Page {data.page} of {data.pageCount}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage() || isPlaceholderData}
+              >
+                Next
+              </Button>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </section>
     </>
   );

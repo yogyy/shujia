@@ -113,6 +113,7 @@ function RouteComponent() {
             variant="outline"
             size="sm"
             className="mt-4"
+            nativeButton={false}
             render={<Link to="/dashboard/user" />}
           >
             Back to users

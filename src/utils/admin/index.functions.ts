@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { env } from "cloudflare:workers";
-import { eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
+import { asc, ilike } from "drizzle-orm/pg-core/expressions";
+import { z } from "zod";
 import { createDb } from "#/db/index.ts";
 import { user } from "#/db/schema/auth.schema.ts";
 import { books } from "#/db/schema/bookshelf.schema.ts";
@@ -14,62 +16,78 @@ async function requireAdmin() {
   if (session.user.role !== "admin") {
     throw new Error("Forbidden");
   }
-
   return session.user;
 }
 
-export const changeUserRole = createServerFn({ method: "POST" }).handler(async () => {
-  const hasPermission = await auth(env).api.userHasPermission({
-    body: {
-      role: "admin",
-      permissions: {
-        user: ["set-role"],
-      },
-    },
-  });
-  console.log(hasPermission);
-  return { success: true };
-});
-
 export const getAllUser = createServerFn({ method: "GET" }).handler(async () => {
-  const headers = getRequestHeaders();
+  await requireAdmin();
+
   const data = await auth(env).api.listUsers({
     query: {
       sortBy: "createdAt",
       sortDirection: "desc",
     },
-    headers,
+    headers: getRequestHeaders(),
   });
 
   return data;
 });
 
-export const getAllBooksAdmin = createServerFn({ method: "GET" }).handler(async () => {
-  await requireAdmin();
-
-  const db = createDb(env.DATABASE_URL);
-
-  const rows = await db
-    .select({
-      id: books.id,
-      slug: books.slug,
-      title: books.title,
-      author: books.author,
-      coverUrl: books.coverUrl,
-      bookFormat: books.bookFormat,
-      totalPages: books.totalPages,
-      createdAt: books.createdAt,
-      createdById: books.createdBy,
-      creatorName: user.name,
-      creatorEmail: user.email,
-    })
-    .from(books)
-    .leftJoin(user, eq(books.createdBy, user.id))
-    .orderBy(books.createdAt)
-    .limit(20);
-
-  return rows;
+const inputSchema = z.object({
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(10),
+  search: z.string().trim().max(100).optional(),
+  sortBy: z.enum(["title", "author", "createdAt"]).default("createdAt"),
+  sortDir: z.enum(["asc", "desc"]).default("desc"),
 });
+
+// di handler
+const sortColumns = {
+  title: books.title,
+  author: books.author,
+  createdAt: books.createdAt,
+} as const;
+
+export const getAllBooksAdmin = createServerFn({ method: "GET" })
+  .validator(inputSchema)
+  .handler(async ({ data: { page, pageSize, search, sortBy, sortDir } }) => {
+    await requireAdmin();
+
+    const db = createDb(env.DATABASE_URL);
+    const dir = sortDir === "asc" ? asc : desc;
+
+    const where = search ? ilike(books.title, `%${search}%`) : undefined;
+
+    const [rows, [{ total }]] = await Promise.all([
+      db
+        .select({
+          id: books.id,
+          slug: books.slug,
+          title: books.title,
+          author: books.author,
+          coverUrl: books.coverUrl,
+          bookFormat: books.bookFormat,
+          createdAt: books.createdAt,
+          creatorId: books.createdBy,
+          creatorName: user.name,
+        })
+        .from(books)
+        .leftJoin(user, eq(books.createdBy, user.id))
+        .where(where)
+        .orderBy(dir(sortColumns[sortBy]), dir(books.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize),
+      db.select({ total: count() }).from(books),
+    ]);
+
+    return {
+      books: rows,
+      total,
+      page,
+      pageSize,
+      pageCount: Math.ceil(total / pageSize),
+    };
+  });
 
 export const deleteBookAdmin = createServerFn({ method: "POST" })
   .validator((data: { bookId: string }) => data)

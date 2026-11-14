@@ -10,11 +10,7 @@ import { bookGenres, books } from "../db/schema/bookshelf.schema";
 import { suggestions } from "../db/schema/suggestion.schema";
 import { ensureSession } from "./auth.functions";
 
-import type { InferSelectModel } from "drizzle-orm";
-
 const genresSchema = z.array(z.number());
-
-export type Book = InferSelectModel<typeof books>;
 
 // ── Suggestion changes: discriminated union matching SuggestionChanges type ──
 const BookEditChangesSchema = z.object({

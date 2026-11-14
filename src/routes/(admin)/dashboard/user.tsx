@@ -147,7 +147,7 @@ function UserDashboard() {
                           <button
                             type="button"
                             onClick={header.column.getToggleSortingHandler()}
-                            className="flex cursor-pointer items-center select-none"
+                            className="hover:[&>svg]:text-accent flex cursor-pointer items-center px-2 select-none"
                           >
                             <FlexRender header={header} />
                             <SortIcon isSorted={sorted} />

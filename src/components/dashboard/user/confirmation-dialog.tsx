@@ -37,7 +37,7 @@ export function ConfirmationDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-destructive font-semibold text-pretty">
+          <AlertDialogDescription className="font-semibold text-balance">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -6,7 +6,8 @@ import { toast, type ExternalToast } from "sonner";
 import { useUploadImage } from "#/hooks/useUploadImage.ts";
 import { authClient } from "#/lib/auth-client.ts";
 import { filterEmptyValues } from "#/lib/utils.ts";
-import { createSuggestion, updateBook } from "#/utils/books.functions.ts";
+import { updateBook } from "#/utils/books.functions.ts";
+import { createSuggestion } from "#/utils/suggestion.functions.ts";
 import { FormatSelector } from "../book/format-selection";
 import { GenreSelector } from "../book/genre-selection";
 import { ImageUpload, uploadToR2 } from "../image-upload";
@@ -116,9 +117,7 @@ export function SuggestEditForm({ bookId, bookTitle }: SuggestEditFormProps) {
       suggestionMutation.mutate({
         data: {
           bookId,
-          type: "book_edit",
           note: note as string,
-          suggestedBy: session?.user.id,
           changes: { type: "book_edit", ...cleanData },
         },
       });

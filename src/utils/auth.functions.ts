@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { env } from "cloudflare:workers";
 import * as z from "zod/mini";
@@ -31,14 +31,14 @@ export const verifyTurnstile = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-export const getSession = createServerFn({ method: "GET" }).handler(async () => {
+export const getSessionFn = createServerFn({ method: "GET" }).handler(async () => {
   const headers = getRequestHeaders();
   const session = await auth(env).api.getSession({ headers });
 
   return session;
 });
 
-export const ensureSession = createServerFn({ method: "GET" }).handler(async () => {
+export const ensureSessionFn = createServerFn({ method: "GET" }).handler(async () => {
   const headers = getRequestHeaders();
   const session = await auth(env).api.getSession({ headers });
 
@@ -48,3 +48,56 @@ export const ensureSession = createServerFn({ method: "GET" }).handler(async () 
 
   return session;
 });
+
+export const roles = {
+  USER: "user",
+  ADMIN: "admin",
+  EDITOR: "editor",
+} as const;
+
+type Role = (typeof roles)[keyof typeof roles];
+
+export function hasPermission(userRole: Role, requiredRole: Role): boolean {
+  const hierarchy = {
+    [roles.USER]: 0,
+    [roles.EDITOR]: 1,
+    [roles.ADMIN]: 2,
+  };
+
+  return hierarchy[userRole] >= hierarchy[requiredRole];
+}
+
+export const getSessionMiddleware = createMiddleware().server(async ({ next }) => {
+  const session = await auth(env).api.getSession({ headers: getRequestHeaders() });
+
+  return next({ context: session });
+});
+
+export const requireAuth = createMiddleware({ type: "function" })
+  .middleware([getSessionMiddleware])
+  .server(async ({ next, context }) => {
+    if (!context) throw new Error("Unauthorized");
+
+    return next({ context: { user: context.user } });
+  });
+
+export const requireReviewer = createMiddleware({ type: "function" })
+  .middleware([requireAuth])
+  .server(async ({ next, context }) => {
+    const role = context.user.role;
+    if (role !== "admin" && role !== "editor") {
+      throw new Error("Forbidden");
+    }
+
+    return next();
+  });
+
+export const requireAdmin = createMiddleware({ type: "function" })
+  .middleware([requireAuth])
+  .server(async ({ next, context }) => {
+    if (context.user.role !== "admin") {
+      throw new Error("Forbidden");
+    }
+
+    return next();
+  });

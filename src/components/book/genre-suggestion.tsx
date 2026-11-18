@@ -5,8 +5,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { useMediaQuery } from "#/hooks/useMediaQuery.ts";
 import { authClient } from "#/lib/auth-client.ts";
-import { slugify } from "#/lib/utils.ts";
-import { createSuggestion } from "#/utils/books.functions.ts";
+import { createSuggestion } from "#/utils/suggestion.functions.ts";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { Skeleton } from "../ui/skeleton";
@@ -41,7 +40,8 @@ interface GenreSuggestionProps {
 
 export function GenreSuggestion({ bookId, currentGenreIds }: GenreSuggestionProps) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)"); // this cause hydration-mismatch
+  // SSR has no matchMedia, so the first paint must match the server render.
+  const isDesktop = useMediaQuery("(min-width: 768px)", { initializeWithValue: false });
 
   const trigger = (
     <Button variant="secondary" size="xs" className="rounded-sm border">
@@ -144,7 +144,7 @@ function GenreSuggestionForm({ bookId, currentGenreIds, onSuccess }: GenreSugges
     });
   }
 
-  function handleAddNewGenre(e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent) {
+  function handleAddNewGenre() {
     const trimmed = customGenreInput.trim();
     if (!trimmed) return;
 
@@ -167,26 +167,24 @@ function GenreSuggestionForm({ bookId, currentGenreIds, onSuccess }: GenreSugges
     setNewGenres((prev) => prev.filter((g) => g !== name));
   }
 
+  const changeCount = toAdd.size + toRemove.size + newGenres.length;
+
   function handleSubmit() {
-    if (toAdd.size === 0) {
-      toast.info("Select at least one new genre.", { position: "top-left" });
+    if (changeCount === 0) {
+      toast.info("Add, remove, or propose at least one genre.", { position: "top-left" });
       return;
     }
 
     mutate({
       data: {
         bookId,
-        type: "book_genres",
-        suggestedBy: session?.user.id,
         note: noteRef.current?.value || undefined,
         changes: {
           type: "book_genres",
           addGenreIds: toAdd.size > 0 ? [...toAdd] : undefined,
           removeGenreIds: toRemove.size > 0 ? [...toRemove] : undefined,
           newGenres:
-            newGenres.length > 0
-              ? newGenres.map((name) => ({ name, slug: slugify(name) }))
-              : undefined,
+            newGenres.length > 0 ? newGenres.map((name) => ({ name })) : undefined,
         },
       },
     });
@@ -301,7 +299,7 @@ function GenreSuggestionForm({ bookId, currentGenreIds, onSuccess }: GenreSugges
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    handleAddNewGenre(e);
+                    handleAddNewGenre();
                   }
                 }}
                 placeholder="e.g. Cyberpunk Noir, LitRPG..."
@@ -336,10 +334,10 @@ function GenreSuggestionForm({ bookId, currentGenreIds, onSuccess }: GenreSugges
       <Button
         type="button"
         className="w-full"
-        disabled={!session || isPending || toAdd.size === 0}
+        disabled={!session || isPending || changeCount === 0}
         onClick={handleSubmit}
       >
-        {isPending ? "Submitting…" : `Submit ${toAdd.size > 0 ? `(${toAdd.size})` : "suggestion"}`}
+        {isPending ? "Submitting…" : `Submit ${changeCount > 0 ? `(${changeCount})` : "suggestion"}`}
       </Button>
     </div>
   );

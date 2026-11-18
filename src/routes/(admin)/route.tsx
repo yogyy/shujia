@@ -5,11 +5,11 @@ import { Navbar } from "#/components/section/navbar.tsx";
 import { RouterBreadcrumb } from "#/components/section/router-breadcrumb.tsx";
 import { Separator } from "#/components/ui/separator.tsx";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar.tsx";
-import { getSession } from "#/utils/auth.functions.ts";
+import { getSessionFn } from "#/utils/auth.functions.ts";
 
 export const Route = createFileRoute("/(admin)")({
   beforeLoad: async () => {
-    const session = await getSession();
+    const session = await getSessionFn();
     if (session?.user.role !== "admin") throw notFound();
   },
   component: RouteComponent,

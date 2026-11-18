@@ -9,17 +9,13 @@ export const suggestionStatusEnum = pgEnum("shujia_suggestion_status", [
   "rejected",
 ]);
 
-export const suggestionTypeEnum = pgEnum("shujia_suggestion_type", [
-  "book_edit",
-  "book_genres",
-  "new_genre",
-]);
+export const suggestionTypeEnum = pgEnum("shujia_suggestion_type", ["book_edit", "book_genres"]);
 
 // ── Changes payload (discriminated by `type`) ──────────────────────────
 //
 // book_edit   → patch scalar fields on `books`
-// book_genres → attach existing genres (and optionally propose new ones)
-// new_genre   → propose a brand-new genre entry
+// book_genres → add existing genres, remove attached ones, and optionally
+//               propose brand-new genres (created + attached on approval)
 export type SuggestionChanges =
   | {
       type: "book_edit";
@@ -34,12 +30,7 @@ export type SuggestionChanges =
       type: "book_genres";
       addGenreIds?: number[];
       removeGenreIds?: number[];
-      newGenres?: { name: string; slug?: string }[];
-    }
-  | {
-      type: "new_genre";
-      name: string;
-      slug: string;
+      newGenres?: { name: string }[];
     };
 
 export const suggestions = shujiaTable(
@@ -47,7 +38,8 @@ export const suggestions = shujiaTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
 
-    // Required for book_edit / book_genres, optional context for new_genre
+    // Required by every suggestion type at the API boundary; stays nullable
+    // in the table only for legacy rows created before the merge.
     bookId: uuid("book_id").references(() => books.id, {
       onDelete: "cascade",
     }),

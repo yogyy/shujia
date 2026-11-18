@@ -4,7 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ConfirmationDialog } from "#/components/dashboard/user/confirmation-dialog";
+import { ConfirmationDialog } from "#/components/dashboard/confirmation-dialog.tsx";
 import {
   SessionProfileCard,
   SessionProfileSkeleton,

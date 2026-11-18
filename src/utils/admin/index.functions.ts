@@ -8,10 +8,10 @@ import { createDb } from "#/db/index.ts";
 import { user } from "#/db/schema/auth.schema.ts";
 import { books } from "#/db/schema/bookshelf.schema.ts";
 import { auth } from "#/lib/auth.ts";
-import { ensureSession } from "../auth.functions";
+import { ensureSessionFn } from "../auth.functions";
 
 async function requireAdmin() {
-  const session = await ensureSession();
+  const session = await ensureSessionFn();
 
   if (session.user.role !== "admin") {
     throw new Error("Forbidden");

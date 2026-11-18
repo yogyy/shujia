@@ -26,7 +26,7 @@ import {
 } from "#/components/ui/dropdown-menu";
 import { Textarea } from "#/components/ui/textarea";
 import { authClient } from "#/lib/auth-client";
-import { ConfirmationDialog } from "./confirmation-dialog";
+import { ConfirmationDialog } from "../confirmation-dialog";
 
 import type { UserWithRole } from "better-auth/plugins";
 

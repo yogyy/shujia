@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
 import { deleteBookAdmin } from "#/utils/admin/index.functions.ts";
-import { ConfirmationDialog } from "../user/confirmation-dialog";
+import { ConfirmationDialog } from "../confirmation-dialog";
 
 import type { BookRow } from "./columns";
 

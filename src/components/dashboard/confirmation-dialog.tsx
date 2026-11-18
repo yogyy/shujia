@@ -19,6 +19,7 @@ interface ConfirmationDialogProps {
   actionFn: () => void;
   actionLabel: string;
   actionVariant?: "default" | "destructive" | "ghost" | "link" | "outline" | "secondary";
+  contentClassName?: string;
 }
 
 export function ConfirmationDialog({
@@ -31,10 +32,11 @@ export function ConfirmationDialog({
   actionFn,
   actionLabel,
   actionVariant = "destructive",
+  contentClassName,
 }: ConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className={contentClassName}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="font-semibold text-balance">

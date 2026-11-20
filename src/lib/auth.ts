@@ -14,6 +14,13 @@ export const auth = (env: Cloudflare.Env) =>
       provider: "pg",
       schema,
     }),
+    user: {
+      additionalFields: {
+        role: {
+          type: ["user", "editor", "admin"],
+        },
+      },
+    },
     emailAndPassword: {
       enabled: true,
     },

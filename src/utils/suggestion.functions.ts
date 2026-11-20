@@ -120,7 +120,7 @@ async function queryPage(input: z.infer<typeof listInput>, suggestedBy?: string)
           coverUrl: books.coverUrl,
           author: books.author,
           totalPages: books.totalPages,
-          // description: books.description,
+          description: books.description,
           bookFormat: books.bookFormat,
         },
         suggester: { id: user.id, name: user.name },
@@ -170,6 +170,58 @@ async function queryPage(input: z.infer<typeof listInput>, suggestedBy?: string)
 
   return {
     items: itemsWithGenres,
+    total,
+    page: input.page,
+    limit: input.limit,
+    totalPages: Math.max(1, Math.ceil(total / input.limit)),
+  };
+}
+
+async function queryReviewQueuePage(input: z.infer<typeof listInput>) {
+  const where = and(
+    input.status ? eq(suggestions.status, input.status) : undefined,
+    input.type ? eq(suggestions.type, input.type) : undefined,
+    input.bookId ? eq(suggestions.bookId, input.bookId) : undefined,
+  );
+  const db = createDb(env.DATABASE_URL);
+
+  const [rows, total] = await Promise.all([
+    db
+      .select({
+        id: suggestions.id,
+        type: suggestions.type,
+        status: suggestions.status,
+        changes: suggestions.changes,
+        reviewedAt: suggestions.reviewedAt,
+        createdAt: suggestions.createdAt,
+        book: { title: books.title, coverUrl: books.coverUrl },
+        suggester: { name: user.name },
+      })
+      .from(suggestions)
+      .leftJoin(books, eq(books.id, suggestions.bookId))
+      .leftJoin(user, eq(user.id, suggestions.suggestedBy))
+      .where(where)
+      .orderBy(desc(suggestions.createdAt), desc(suggestions.id))
+      .limit(input.limit)
+      .offset((input.page - 1) * input.limit),
+    db.$count(suggestions, where),
+  ]);
+
+  const items = rows.map(({ changes, ...item }) => ({
+    ...item,
+    changeSummary:
+      changes.type === "book_edit"
+        ? { type: "book_edit" as const, fields: Object.keys(changes).filter((key) => key !== "type") }
+        : {
+            type: "book_genres" as const,
+            added: changes.addGenreIds?.length ?? 0,
+            removed: changes.removeGenreIds?.length ?? 0,
+            proposed: changes.newGenres?.map((genre) => genre.name) ?? [],
+          },
+  }));
+
+  return {
+    items,
     total,
     page: input.page,
     limit: input.limit,
@@ -237,7 +289,8 @@ export const getSuggestion = createServerFn({ method: "GET" })
       .where(and(eq(suggestions.id, data.id), eq(suggestions.suggestedBy, context.user.id)))
       .limit(1);
 
-    if (!row) throw new Error("Saran tidak ditemukan");
+    if (!row) throw new Error("Suggestion not found");
+
     return row;
   });
 
@@ -267,7 +320,7 @@ export const withdrawSuggestion = createServerFn({ method: "POST" })
 export const listSuggestions = createServerFn({ method: "GET" })
   .middleware([requireReviewer])
   .validator(listInput)
-  .handler(({ data }) => queryPage(data));
+  .handler(({ data }) => queryReviewQueuePage(data));
 
 export const getPendingSuggestionCount = createServerFn({ method: "GET" })
   .middleware([requireReviewer])
@@ -295,10 +348,34 @@ export const getSuggestionForReview = createServerFn({ method: "GET" })
       .where(eq(suggestions.id, data.id))
       .limit(1);
 
-    if (!row) throw new Error("Saran tidak ditemukan");
+    if (!row) throw new Error("Suggestion not found");
+
+    const { changes, ...suggestion } = row.suggestion;
+    const referencedGenreIds =
+      changes.type === "book_genres"
+        ? [...new Set([...(changes.addGenreIds ?? []), ...(changes.removeGenreIds ?? [])])]
+        : [];
+    const genreRows =
+      referencedGenreIds.length > 0
+        ? await db
+            .select({ id: genres.id, name: genres.name })
+            .from(genres)
+            .where(inArray(genres.id, referencedGenreIds))
+        : [];
+    const genreNames = new Map(genreRows.map((genre) => [genre.id, genre.name]));
+    const resolveGenre = (id: number) => ({ id, name: genreNames.get(id) ?? null });
 
     return {
       ...row,
+      suggestion,
+      changes,
+      genreChanges:
+        changes.type === "book_genres"
+          ? {
+              added: (changes.addGenreIds ?? []).map(resolveGenre),
+              removed: (changes.removeGenreIds ?? []).map(resolveGenre),
+            }
+          : null,
       // buku berubah setelah saran dibuat → diff mungkin basi
       isStale: !!row.book && row.book.updatedAt > row.suggestion.createdAt,
     };

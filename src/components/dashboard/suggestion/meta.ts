@@ -76,7 +76,7 @@ export const BOOK_EDIT_FIELDS = [
   { key: "author", label: "Author" },
   { key: "coverUrl", label: "Cover" },
   { key: "totalPages", label: "Pages" },
-  // { key: "description", label: "Description" },
+  { key: "description", label: "Description" },
   { key: "bookFormat", label: "Format" },
 ] as const;
 

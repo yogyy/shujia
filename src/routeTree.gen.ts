@@ -19,6 +19,7 @@ import { Route as BookSlugRouteImport } from './routes/book/$slug'
 import { Route as adminDashboardIndexRouteImport } from './routes/(admin)/dashboard/index'
 import { Route as adminDashboardBookRouteImport } from './routes/(admin)/dashboard/book'
 import { Route as adminDashboardUserRouteImport } from './routes/(admin)/dashboard/user'
+import { Route as adminSuggestionSlugRouteImport } from './routes/(admin)/suggestion.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiBooksIndexRouteImport } from './routes/api/books/index'
 import { Route as ApiBooksGenresRouteImport } from './routes/api/books/genres'
@@ -75,6 +76,11 @@ const adminDashboardUserRoute = adminDashboardUserRouteImport.update({
   path: '/dashboard/user',
   getParentRoute: () => adminRouteRoute,
 } as any)
+const adminSuggestionSlugRoute = adminSuggestionSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => adminSuggestionRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -111,11 +117,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
   '/search': typeof SearchRoute
-  '/suggestion': typeof adminSuggestionRoute
+  '/suggestion': typeof adminSuggestionRouteWithChildren
   '/api/genres': typeof ApiGenresRoute
   '/book/$slug': typeof BookSlugRoute
   '/dashboard/book': typeof adminDashboardBookRoute
   '/dashboard/user': typeof adminDashboardUserRouteWithChildren
+  '/suggestion/$slug': typeof adminSuggestionSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
@@ -128,11 +135,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
   '/search': typeof SearchRoute
-  '/suggestion': typeof adminSuggestionRoute
+  '/suggestion': typeof adminSuggestionRouteWithChildren
   '/api/genres': typeof ApiGenresRoute
   '/book/$slug': typeof BookSlugRoute
   '/dashboard/book': typeof adminDashboardBookRoute
   '/dashboard/user': typeof adminDashboardUserRouteWithChildren
+  '/suggestion/$slug': typeof adminSuggestionSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
@@ -147,11 +155,12 @@ export interface FileRoutesById {
   '/(admin)': typeof adminRouteRouteWithChildren
   '/bookmarks': typeof BookmarksRoute
   '/search': typeof SearchRoute
-  '/(admin)/suggestion': typeof adminSuggestionRoute
+  '/(admin)/suggestion': typeof adminSuggestionRouteWithChildren
   '/api/genres': typeof ApiGenresRoute
   '/book/$slug': typeof BookSlugRoute
   '/(admin)/dashboard/book': typeof adminDashboardBookRoute
   '/(admin)/dashboard/user': typeof adminDashboardUserRouteWithChildren
+  '/(admin)/suggestion/$slug': typeof adminSuggestionSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/books/genres': typeof ApiBooksGenresRoute
   '/api/images/$key': typeof ApiImagesKeyRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/dashboard/book'
     | '/dashboard/user'
+    | '/suggestion/$slug'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/dashboard/book'
     | '/dashboard/user'
+    | '/suggestion/$slug'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/book/$slug'
     | '/(admin)/dashboard/book'
     | '/(admin)/dashboard/user'
+    | '/(admin)/suggestion/$slug'
     | '/api/auth/$'
     | '/api/books/genres'
     | '/api/images/$key'
@@ -301,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof adminDashboardUserRouteImport
       parentRoute: typeof adminRouteRoute
     }
+    '/(admin)/suggestion/$slug': {
+      id: '/(admin)/suggestion/$slug'
+      path: '/$slug'
+      fullPath: '/suggestion/$slug'
+      preLoaderRoute: typeof adminSuggestionSlugRouteImport
+      parentRoute: typeof adminSuggestionRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -346,6 +365,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface adminSuggestionRouteChildren {
+  adminSuggestionSlugRoute: typeof adminSuggestionSlugRoute
+}
+
+const adminSuggestionRouteChildren: adminSuggestionRouteChildren = {
+  adminSuggestionSlugRoute: adminSuggestionSlugRoute,
+}
+
+const adminSuggestionRouteWithChildren = adminSuggestionRoute._addFileChildren(
+  adminSuggestionRouteChildren,
+)
+
 interface adminDashboardUserRouteChildren {
   adminDashboardUserSessionRoute: typeof adminDashboardUserSessionRoute
 }
@@ -358,14 +389,14 @@ const adminDashboardUserRouteWithChildren =
   adminDashboardUserRoute._addFileChildren(adminDashboardUserRouteChildren)
 
 interface adminRouteRouteChildren {
-  adminSuggestionRoute: typeof adminSuggestionRoute
+  adminSuggestionRoute: typeof adminSuggestionRouteWithChildren
   adminDashboardBookRoute: typeof adminDashboardBookRoute
   adminDashboardUserRoute: typeof adminDashboardUserRouteWithChildren
   adminDashboardIndexRoute: typeof adminDashboardIndexRoute
 }
 
 const adminRouteRouteChildren: adminRouteRouteChildren = {
-  adminSuggestionRoute: adminSuggestionRoute,
+  adminSuggestionRoute: adminSuggestionRouteWithChildren,
   adminDashboardBookRoute: adminDashboardBookRoute,
   adminDashboardUserRoute: adminDashboardUserRouteWithChildren,
   adminDashboardIndexRoute: adminDashboardIndexRoute,

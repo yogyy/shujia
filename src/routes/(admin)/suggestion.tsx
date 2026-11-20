@@ -4,37 +4,27 @@ import {
   CaretRightIcon,
   ShieldCheckIcon,
 } from "@phosphor-icons/react";
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { cn } from "cn";
 import { useState } from "react";
-import { toast } from "sonner";
-import { Stat } from "#/components/dashboard/sub.tsx";
-import { SuggestionCard } from "#/components/dashboard/suggestion/card.tsx";
-import { PAGE_SIZE, STATUS_TABS, TYPE_OPTIONS } from "#/components/dashboard/suggestion/meta.ts";
-import { EmptyQueue, SuggestionListSkeleton } from "#/components/dashboard/suggestion/states.tsx";
-import { Button } from "#/components/ui/button.tsx";
-import { NativeSelect, NativeSelectOption } from "#/components/ui/native-select.tsx";
-import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs.tsx";
-import {
-  approveSuggestion,
-  getPendingSuggestionCount,
-  listSuggestions,
-  rejectSuggestion,
-} from "#/utils/suggestion.functions.ts";
+import { Stat } from "#/components/dashboard/sub";
+import { SuggestionCard } from "#/components/dashboard/suggestion/card";
+import { PAGE_SIZE, STATUS_TABS, TYPE_OPTIONS } from "#/components/dashboard/suggestion/meta";
+import { EmptyQueue, SuggestionListSkeleton } from "#/components/dashboard/suggestion/states";
+import { Button } from "#/components/ui/button";
+import { NativeSelect, NativeSelectOption } from "#/components/ui/native-select";
+import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import { getPendingSuggestionCount, listSuggestions } from "#/utils/suggestion.functions";
 
-import type {
-  ReviewAction,
-  StatusFilter,
-  TypeFilter,
-} from "#/components/dashboard/suggestion/meta.ts";
+import type { StatusFilter, TypeFilter } from "#/components/dashboard/suggestion/meta";
 
 export const Route = createFileRoute("/(admin)/suggestion")({
   component: SuggestionQueue,
 });
 
 function SuggestionQueue() {
-  const queryClient = useQueryClient();
+  const { queryClient } = Route.useRouteContext();
 
   const [status, setStatus] = useState<StatusFilter>("pending");
   const [type, setType] = useState<TypeFilter>("all");
@@ -58,34 +48,6 @@ function SuggestionQueue() {
     queryKey: ["admin", "suggestions", "pending-count"],
     queryFn: () => getPendingSuggestionCount(),
   });
-
-  const approve = useMutation({
-    mutationFn: (id: string) => approveSuggestion({ data: { id } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "suggestions"] }),
-  });
-
-  const reject = useMutation({
-    mutationFn: (input: { id: string; reviewNote: string }) => rejectSuggestion({ data: input }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "suggestions"] }),
-  });
-
-  const isMutating = approve.isPending || reject.isPending;
-
-  async function handleReview(id: string, action: ReviewAction, reviewNote?: string) {
-    try {
-      if (action === "approve") {
-        await approve.mutateAsync(id);
-        toast.success("Suggestion approved.");
-      } else {
-        await reject.mutateAsync({ id, reviewNote: reviewNote ?? "" });
-        toast.success("Suggestion rejected.");
-      }
-      return true;
-    } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Something went wrong.");
-      return false;
-    }
-  }
 
   return (
     <>
@@ -114,6 +76,8 @@ function SuggestionQueue() {
           </div>
         </section>
       </div>
+
+      <Outlet />
 
       <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-10">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -192,17 +156,9 @@ function SuggestionQueue() {
               )}
             >
               {data.items.map((item) => (
-                <SuggestionCard
-                  key={item.id}
-                  item={item}
-                  isMutating={isMutating}
-                  onReview={handleReview}
-                />
+                <SuggestionCard key={item.id} item={item} />
               ))}
             </div>
-
-            {/* debug */}
-            <pre>{JSON.stringify(data, null, 4)}</pre>
 
             {data.totalPages > 1 ? (
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4">

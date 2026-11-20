@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "#/components/ui/tooltip.tsx";
 import devtools from "#/integrations/tanstack-query/devtools.tsx";
 import { seo } from "#/lib/seo";
-import { NotFoundRoot } from "#/routes/-not-found-page.tsx";
+import { NotFoundRoot, ServerErrorRoot } from "#/routes/-default-page.tsx";
 import appCss from "#/styles.css?url";
 
 import type { QueryClient } from "@tanstack/react-query";
@@ -58,6 +58,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   }),
   shellComponent: RootDocument,
   notFoundComponent: NotFoundRoot,
+  errorComponent: (e) => ServerErrorRoot(e),
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {

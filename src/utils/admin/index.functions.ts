@@ -8,30 +8,21 @@ import { createDb } from "#/db/index.ts";
 import { user } from "#/db/schema/auth.schema.ts";
 import { books } from "#/db/schema/bookshelf.schema.ts";
 import { auth } from "#/lib/auth.ts";
-import { ensureSessionFn } from "../auth.functions";
+import { requireAdmin } from "../auth.functions";
 
-async function requireAdmin() {
-  const session = await ensureSessionFn();
+export const getAllUser = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async () => {
+    const data = await auth(env).api.listUsers({
+      query: {
+        sortBy: "createdAt",
+        sortDirection: "desc",
+      },
+      headers: getRequestHeaders(),
+    });
 
-  if (session.user.role !== "admin") {
-    throw new Error("Forbidden");
-  }
-  return session.user;
-}
-
-export const getAllUser = createServerFn({ method: "GET" }).handler(async () => {
-  await requireAdmin();
-
-  const data = await auth(env).api.listUsers({
-    query: {
-      sortBy: "createdAt",
-      sortDirection: "desc",
-    },
-    headers: getRequestHeaders(),
+    return data;
   });
-
-  return data;
-});
 
 const inputSchema = z.object({
   page: z.number().int().min(1).default(1),
@@ -49,10 +40,9 @@ const sortColumns = {
 } as const;
 
 export const getAllBooksAdmin = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
   .validator(inputSchema)
   .handler(async ({ data: { page, pageSize, search, sortBy, sortDir } }) => {
-    await requireAdmin();
-
     const db = createDb(env.DATABASE_URL);
     const dir = sortDir === "asc" ? asc : desc;
 
@@ -67,6 +57,7 @@ export const getAllBooksAdmin = createServerFn({ method: "GET" })
           author: books.author,
           coverUrl: books.coverUrl,
           bookFormat: books.bookFormat,
+          status: books.status,
           createdAt: books.createdAt,
           creatorId: books.createdBy,
           creatorName: user.name,
@@ -87,15 +78,4 @@ export const getAllBooksAdmin = createServerFn({ method: "GET" })
       pageSize,
       pageCount: Math.ceil(total / pageSize),
     };
-  });
-
-export const deleteBookAdmin = createServerFn({ method: "POST" })
-  .validator((data: { bookId: string }) => data)
-  .handler(async ({ data }) => {
-    await requireAdmin();
-
-    const db = createDb(env.DATABASE_URL);
-    await db.delete(books).where(eq(books.id, data.bookId));
-
-    return { success: true };
   });

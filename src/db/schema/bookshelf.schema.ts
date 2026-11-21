@@ -24,6 +24,12 @@ export const bookFormatEnum = pgEnum("shujia_book_format", ["physical", "ebook",
 
 export const visibilityEnum = pgEnum("shujia_visibility", ["private", "public", "unlisted"]);
 
+export const bookPublishStatusEnum = pgEnum("shujia_book_publish_status", [
+  "pending",
+  "published",
+  "rejected",
+]);
+
 export const books = shujiaTable(
   "books",
   {
@@ -31,6 +37,9 @@ export const books = shujiaTable(
 
     slug: text("slug").notNull().unique(),
     bookFormat: bookFormatEnum("book_format").default("ebook").notNull(),
+
+    /** Whether the book is visible on the public shelf. Readers' additions start pending. */
+    status: bookPublishStatusEnum("status").default("pending").notNull(),
 
     title: text("title").notNull(),
     author: text("author"),
@@ -53,6 +62,8 @@ export const books = shujiaTable(
     index("books_title_idx").on(table.title),
     // sort default: createdAt desc, id desc (tie-breaker)
     index("books_created_at_idx").on(table.createdAt.desc(), table.id.desc()),
+    // public shelf queries: status = 'published' ordered by createdAt desc
+    index("books_status_created_at_idx").on(table.status, table.createdAt.desc()),
     // FK: Postgres TIDAK otomatis bikin index untuk foreign key
     index("books_created_by_idx").on(table.createdBy),
   ],

@@ -12,10 +12,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
-import { deleteBookAdmin } from "#/utils/admin/index.functions.ts";
+import { deleteBook, setBookStatus } from "#/utils/books.functions.ts";
 import { ConfirmationDialog } from "../confirmation-dialog";
 
 import type { BookRow } from "./columns";
+
+type PublishStatus = BookRow["status"];
+
+const statusMessages: Record<PublishStatus, string> = {
+  pending: "Book unpublished — it's waiting for review",
+  published: "Book published",
+  rejected: "Book rejected",
+};
 
 interface MenuProps {
   book: BookRow;
@@ -26,7 +34,7 @@ export function BookRowActions({ book }: MenuProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const deleteMutation = useMutation({
-    mutationFn: () => deleteBookAdmin({ data: { bookId: book.id } }),
+    mutationFn: () => deleteBook({ data: { bookId: book.id } }),
     onSuccess: async () => {
       toast.success("Book deleted");
       setConfirmOpen(false);
@@ -34,6 +42,16 @@ export function BookRowActions({ book }: MenuProps) {
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Failed to delete book"),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (status: PublishStatus) => setBookStatus({ data: { bookId: book.id, status } }),
+    onSuccess: async (result) => {
+      toast.success(statusMessages[result.status]);
+      await router.invalidate();
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Failed to update book status"),
   });
 
   return (
@@ -50,6 +68,35 @@ export function BookRowActions({ book }: MenuProps) {
               View book
             </DropdownMenuItem>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuGroup>
+            {book.status !== "published" ? (
+              <DropdownMenuItem
+                disabled={statusMutation.isPending}
+                onClick={() => statusMutation.mutate("published")}
+              >
+                Publish
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                disabled={statusMutation.isPending}
+                onClick={() => statusMutation.mutate("pending")}
+              >
+                Unpublish
+              </DropdownMenuItem>
+            )}
+            {book.status !== "rejected" ? (
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={statusMutation.isPending}
+                onClick={() => statusMutation.mutate("rejected")}
+              >
+                Reject
+              </DropdownMenuItem>
+            ) : null}
+          </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
 
           <DropdownMenuGroup>

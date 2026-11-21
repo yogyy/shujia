@@ -18,6 +18,7 @@ export type BookRow = {
   author: string | null;
   coverUrl: string | null;
   bookFormat: Book["bookFormat"];
+  status: Book["status"];
   createdAt: Date | string;
   creatorId: string;
   creatorName: string | null;
@@ -29,6 +30,18 @@ export const bookFeatures = tableFeatures({
 });
 
 export const bookColumnHelper = createColumnHelper<typeof bookFeatures, BookRow>();
+
+const statusStyles: Record<Book["status"], string> = {
+  pending: "border-accent/40 text-accent",
+  published: "border-border text-muted-foreground",
+  rejected: "border-destructive/40 text-destructive",
+};
+
+const statusLabels: Record<Book["status"], string> = {
+  pending: "Pending",
+  published: "Published",
+  rejected: "Rejected",
+};
 
 export const bookColumns = bookColumnHelper.columns([
   bookColumnHelper.accessor("title", {
@@ -60,6 +73,20 @@ export const bookColumns = bookColumnHelper.columns([
     header: "Format",
     enableSorting: false,
     cell: ({ getValue }) => <FormatBadge format={getValue()} />,
+  }),
+  bookColumnHelper.accessor("status", {
+    header: "Status",
+    enableSorting: false,
+    cell: ({ getValue }) => {
+      const status = getValue();
+      return (
+        <span
+          className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] tracking-widest uppercase ${statusStyles[status]}`}
+        >
+          {statusLabels[status]}
+        </span>
+      );
+    },
   }),
   bookColumnHelper.accessor("creatorName", {
     header: "Added by",

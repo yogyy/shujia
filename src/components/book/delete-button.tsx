@@ -57,7 +57,7 @@ export function DeleteBookButton({ bookId }: { bookId: string }) {
           <AlertDialogAction
             variant="destructive"
             onClick={() => {
-              deleteBookMutation({ data: bookId });
+              deleteBookMutation({ data: { bookId } });
             }}
           >
             Delete

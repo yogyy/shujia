@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useUploadImage } from "#/hooks/useUploadImage.ts";
 import { authClient } from "#/lib/auth-client.ts";
-import { slugify } from "#/lib/utils.ts";
 import { addNewBook } from "#/utils/books.functions.ts";
 import { FormatSelector } from "../book/format-selection";
 import { GenreSelector } from "../book/genre-selection";
@@ -34,10 +33,15 @@ export function NewBookForm() {
 
   const { mutateAsync: mutateBook, isPending: isBookPending } = useMutation({
     mutationFn: addNewBook,
-    onSuccess: () => {
+    onSuccess: (result) => {
       clearImage();
       queryClient.invalidateQueries({ queryKey: ["books"] });
-      toast.success("Book added successfully!", { position: "top-left" });
+      toast.success(
+        result.status === "pending"
+          ? "Book submitted — an editor will review it before it goes on the shelf."
+          : "Book published!",
+        { position: "top-left" },
+      );
       setOpen(false);
     },
     onError: (error) => toast.error(error.message),
@@ -78,14 +82,7 @@ export function NewBookForm() {
       }
     }
 
-    mutateBook({
-      data: {
-        ...result.data,
-        coverUrl,
-        createdBy: session?.user?.id as string,
-        slug: slugify(result.data.title),
-      },
-    });
+    mutateBook({ data: { ...result.data, coverUrl } });
   }
 
   return (

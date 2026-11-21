@@ -24,7 +24,7 @@ export function DropdownMenuAvatar() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" className="rounded-xs">
+          <Button variant="ghost" size="icon" className="rounded-xs" aria-label="Account menu">
             <Avatar className="rounded-sm">
               <AvatarImage className="rounded-sm" src={data?.user.image!} alt={data?.user.name} />
               <AvatarFallback className="rounded-sm">{data?.user.name.slice(0, 2)}</AvatarFallback>
@@ -38,7 +38,7 @@ export function DropdownMenuAvatar() {
             <>
               <DropdownMenuItem
                 className="flex w-full cursor-pointer items-center gap-2"
-                render={<Link to="/dashboard" />}
+                render={<Link to="/dashboard" activeProps={{ className: "text-accent" }} />}
               >
                 <EqualizerIcon />
                 Dashboard
@@ -52,7 +52,7 @@ export function DropdownMenuAvatar() {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="flex w-full cursor-pointer items-center gap-2"
-            render={<Link to="/bookmarks" />}
+            render={<Link to="/bookmarks" activeProps={{ className: "text-accent" }} />}
           >
             <BookmarksIcon />
             Bookmarks
